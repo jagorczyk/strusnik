@@ -1,0 +1,6 @@
+node_modules
+.next
+test-results
+*.log
+blackjack-adjusted.png
+landing.png

@@ -23,3 +23,5 @@ env/
 __pycache__/
 *.py[cod]
 instance/
+
+deploy/.state/

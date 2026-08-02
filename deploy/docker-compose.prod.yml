@@ -1,0 +1,88 @@
+name: strusnik
+
+services:
+  mysql_db:
+    image: mysql:8.0
+    container_name: strusnik_mysql
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - strusnik_mysql_data:/var/lib/mysql
+    networks:
+      - strusnik_network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  flask_api:
+    image: strusnik-api:${IMAGE_TAG:-latest}
+    build:
+      context: ../backend/flask
+      dockerfile: Dockerfile
+    container_name: strusnik_api
+    restart: unless-stopped
+    env_file:
+      - ../backend/.env
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: production
+      DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:3306/${DB_DATABASE}
+    ports:
+      - "5000:5000"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    command: ["python", "app.py"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - strusnik_network
+
+  frontend:
+    image: strusnik-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ../frontend/strusnik
+      dockerfile: Dockerfile.prod
+      args:
+        NEXT_PUBLIC_SOCKET_URL: ${STRUSNIK_PUBLIC_ORIGIN}
+    container_name: strusnik_frontend
+    restart: unless-stopped
+    environment:
+      API_URL: http://flask_api:5000
+      NODE_ENV: production
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      flask_api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - strusnik_network
+
+volumes:
+  strusnik_mysql_data:
+    name: strusnik_strusnik_mysql_data
+
+networks:
+  strusnik_network:
+    name: strusnik_strusnik_network
+    driver: bridge

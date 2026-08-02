@@ -34,6 +34,17 @@ CORS(
 socket.init_app(app)
 db.init_app(app)
 
+
+@app.get("/health")
+def health():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return {"status": "ok"}, 200
+    except Exception as error:
+        app.logger.warning("Health check failed: %s", error)
+        return {"status": "error"}, 503
+
+
 app.register_blueprint(authentication, url_prefix="/api/auth")
 app.register_blueprint(blackjack, url_prefix="/api/games/blackjack")
 app.register_blueprint(rankings, url_prefix="/api/rankings")
