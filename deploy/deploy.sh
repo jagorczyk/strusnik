@@ -35,8 +35,8 @@ wait_for_health() {
   for attempt in $(seq 1 30); do
     mysql_status="$(docker inspect -f '{{.State.Health.Status}}' strusnik_mysql 2>/dev/null || true)"
     if [[ "$mysql_status" == "healthy" ]] \
-      && curl -fsS --max-time 3 http://127.0.0.1:5000/health >/dev/null \
-      && curl -fsS --max-time 3 http://127.0.0.1:3000/ >/dev/null; then
+      && curl -fsS --max-time 3 http://127.0.0.1:5000/health >/dev/null 2>&1 \
+      && curl -fsS --max-time 3 http://127.0.0.1:3000/ >/dev/null 2>&1; then
       return 0
     fi
     sleep 2
@@ -87,9 +87,13 @@ fi
 printf '%s\n' "$TARGET_SHA" > "$CURRENT_FILE"
 {
   printf '%s\n' "$TARGET_SHA"
-  [[ -n "$previous_sha" ]] && printf '%s\n' "$previous_sha"
-  [[ -f "$VERSIONS_FILE" ]] && cat "$VERSIONS_FILE"
-} | awk 'NF && !seen[$0]++' | head -n 3 > "$VERSIONS_FILE.tmp"
+  if [[ -n "$previous_sha" ]]; then
+    printf '%s\n' "$previous_sha"
+  fi
+  if [[ -f "$VERSIONS_FILE" ]]; then
+    cat "$VERSIONS_FILE"
+  fi
+} | awk 'NF && !seen[$0]++ { if (++count <= 3) print }' > "$VERSIONS_FILE.tmp"
 mv "$VERSIONS_FILE.tmp" "$VERSIONS_FILE"
 cleanup_old_images
 
