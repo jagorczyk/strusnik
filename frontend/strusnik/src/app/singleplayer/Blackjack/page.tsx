@@ -71,7 +71,7 @@ export default function BlackjackPage() {
 
       {gameStatus !== "NOT-STARTED" && (
         <div className="blackjack-game-overlay absolute top-0 left-0 z-10 flex h-full w-full items-center justify-center pointer-events-none">
-          <div className="pointer-events-auto h-full w-full max-w-7xl mx-auto">
+          <div className="pointer-events-auto flex h-full min-h-0 w-full max-w-7xl mx-auto">
             <CardList
               playerDeck={playerDeck}
               dealerDeck={dealerDeck}
