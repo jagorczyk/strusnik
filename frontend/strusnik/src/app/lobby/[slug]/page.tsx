@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import { ArrowUpRight, Plus, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -36,6 +37,18 @@ export default function LobbyPage() {
       )}
 
       <div className="lobby-frame">
+        {gameKey === "haxball" && (
+          <div className="haxball-lobby-splash haxball-waiting-splash" aria-hidden="true">
+            <Image
+              src="/gameTiles/tile_haxball.png"
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 760px) 100vw, 1240px"
+            />
+          </div>
+        )}
+
         <header className="lobby-header">
           <div className="lobby-heading">
             <p className="page-kicker">STRUSNIK / MULTIPLAYER</p>

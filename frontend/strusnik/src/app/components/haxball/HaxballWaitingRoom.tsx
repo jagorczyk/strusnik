@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Check, Clock3, MapPinned, Play, UsersRound } from "lucide-react";
 import type { Socket } from "socket.io-client";
 import HaxballMapPreview from "@/app/components/haxball/HaxballMapPreview";
@@ -129,6 +130,15 @@ export default function HaxballWaitingRoom({
       <div className="haxball-waiting-layout">
         <section className="haxball-waiting-card" aria-labelledby="haxball-waiting-title">
           <header className="haxball-waiting-header">
+            <div className="haxball-waiting-splash" aria-hidden="true">
+              <Image
+                src="/gameTiles/tile_haxball.png"
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 760px) 100vw, 760px"
+              />
+            </div>
             <div>
               <p className="haxball-eyebrow">{t(lang, "haxball.kicker")}</p>
               <h1 id="haxball-waiting-title">{t(lang, "haxball.waiting")}</h1>

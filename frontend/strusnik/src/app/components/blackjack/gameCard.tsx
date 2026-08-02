@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { getCardAssetPath } from '@/app/utils/cardAssets';
 
 interface GameCardProps {
     cardName: string;
@@ -33,7 +34,7 @@ export default function GameCard({
                 <div className="absolute inset-0 w-full h-full backface-hidden transform-[rotateY(180deg)]">
                     {shouldBeRevealed && (
                         <img
-                            src={`/blackjack/cards/${cardName}.png`}
+                            src={getCardAssetPath(cardName)}
                             alt={cardName}
                             className="w-full h-full object-contain drop-shadow-xl rounded-lg"
                         />

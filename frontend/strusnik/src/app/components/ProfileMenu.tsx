@@ -193,7 +193,7 @@ export default function ProfileMenu() {
               <span>{t(lang, "profile_menu.losses")}</span>
             </div>
             <div className="profile-stat">
-              <strong>{statsReady ? `${winRatio.toFixed(1)}%` : "…"}</strong>
+              <strong className="profile-stat-value">{statsReady ? `${winRatio.toFixed(1)}%` : "…"}</strong>
               <span>{t(lang, "profile_menu.win_ratio")}</span>
             </div>
           </div>

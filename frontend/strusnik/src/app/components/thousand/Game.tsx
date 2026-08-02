@@ -9,6 +9,7 @@ import PlayerTile from '@/app/components/multiplayer/PlayerTile';
 import type { PlayerTileModel } from '@/app/components/multiplayer/types';
 import { useLang } from '@/app/lang';
 import { t } from '@/app/i18n';
+import { getCardAssetPath } from '@/app/utils/cardAssets';
 
 interface Player {
   socketId: string;
@@ -221,7 +222,7 @@ export default function Game({ socket, roomId, seats: initialSeats, myId, initia
 
     setFlyingCard({
       id: cardCode,
-      src: `/blackjack/cards/${cardCode}.png`,
+      src: getCardAssetPath(cardCode),
       style: {
         position: 'fixed',
         top: startRect.top,
@@ -714,7 +715,7 @@ export default function Game({ socket, roomId, seats: initialSeats, myId, initia
                           className={`thousand-hand-card${isInteractive && isValid ? ' is-valid' : ''}${isInteractive && !isValid ? ' is-invalid' : ''}`}
                           style={{ animationDelay: `${index * 55}ms` }}
                         >
-                          <img src={`/blackjack/cards/${card}.png`} alt="" draggable={false} />
+                          <img src={getCardAssetPath(card)} alt="" draggable={false} />
                         </button>
                       );
                     })}
@@ -777,7 +778,7 @@ export default function Game({ socket, roomId, seats: initialSeats, myId, initia
                     return (
                       <img
                         key={`${tableCard.card}-${index}`}
-                        src={`/blackjack/cards/${tableCard.card}.png`}
+                        src={getCardAssetPath(tableCard.card)}
                         className="thousand-trick-card"
                         style={{
                           transform: `translate(-50%, -50%) translate(${offset * 14}px, ${Math.abs(offset) * 3}px) rotate(${offset * 6}deg)`,

@@ -2624,10 +2624,16 @@ html {
 }
 
 .profile-stat strong {
+  min-width: 0;
   color: var(--text);
   font-size: 20px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+.profile-stat-value {
+  font-size: clamp(16px, 5vw, 20px) !important;
 }
 
 .profile-stat span {
@@ -3056,7 +3062,16 @@ html {
 }
 
 .profile-menu-link svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
   color: var(--amber);
+}
+
+.profile-menu-link > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-menu-friends-toggle {
@@ -11448,6 +11463,28 @@ html[data-reduced-motion="true"] *::after {
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
+}
+
+.haxball-waiting-splash {
+  position: relative;
+  width: min(100%, 760px);
+  height: clamp(140px, 20vw, 220px);
+  overflow: hidden;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+}
+
+.haxball-waiting-splash img {
+  object-fit: cover;
+  object-position: center 30%;
+  opacity: 0.9;
+}
+
+.haxball-lobby-splash {
+  margin-bottom: 24px;
 }
 
 .multiplayer-active-shell--haxball-lobby .haxball-waiting-header {

@@ -40,7 +40,7 @@ export default function MultiplayerGamesPage() {
                     <Card imgSrc='/gameTiles/tile_chess.png' gameName='Chess' />
                     <Card imgSrc='/gameTiles/tile_battleships.png' gameName='Battleships' />
                     <Card imgSrc='/gameTiles/tile_set.png' gameName='Set' />
-                    <Card imgSrc='/gameTiles/tile_haxball.png?v=2' gameName='Haxball' />
+                    <Card imgSrc='/gameTiles/tile_haxball.png' gameName='Haxball' />
                 </CardContainer>
             </div>
         </main>

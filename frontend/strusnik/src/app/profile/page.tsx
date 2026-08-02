@@ -215,7 +215,7 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="min-w-0 p-3 bg-app-surface-soft/50 rounded-lg">
                                         <div className="break-words text-xs text-gray-400">{t(lang, "profile.win_ratio")}</div>
-                                        <div className="text-xl font-bold text-white">{profileData.multiplayer.win_ratio.toFixed(1)}%</div>
+                                        <div className="profile-stat-value text-xl font-bold text-white">{profileData.multiplayer.win_ratio.toFixed(1)}%</div>
                                     </div>
                                 </div>
 
