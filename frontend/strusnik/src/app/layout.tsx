@@ -17,8 +17,48 @@ const Perciles = localFont({
   fallback: ["Poppins", "Segoe UI", "system-ui", "sans-serif"],
 });
 
+const siteUrl = "https://strusnik.pl";
+
 export const metadata: Metadata = {
-  title: "STRUSNIK - ONLINE GAMES",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Strusnik – darmowe gry online",
+    template: "%s | Strusnik",
+  },
+  description:
+    "Graj online w szachy, Haxball, Stratego, Tysiąca, Statki i inne gry. Zagraj solo albo dołącz do pokoju ze znajomymi.",
+  applicationName: "Strusnik",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pl_PL",
+    alternateLocale: ["en_US"],
+    url: siteUrl,
+    siteName: "Strusnik",
+    title: "Strusnik – darmowe gry online",
+    description:
+      "Graj solo albo ze znajomymi w popularne gry online: szachy, Haxball, Stratego, Tysiąc i więcej.",
+    images: [
+      {
+        url: "/main/background.webp",
+        width: 1536,
+        height: 1024,
+        alt: "Strusnik – darmowe gry online",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Strusnik – darmowe gry online",
+    description: "Darmowe gry online solo i multiplayer dla znajomych.",
+    images: ["/main/background.webp"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: { icon: "/favicon.ico" },
 };
 

@@ -28,8 +28,26 @@ export default function HomePage() {
     checkAdmin();
   }, []);
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Strusnik",
+    url: "https://strusnik.pl",
+    description:
+      "Darmowe gry online solo i multiplayer: szachy, Haxball, Stratego, Tysiąc, Statki i więcej.",
+    applicationCategory: "GameApplication",
+    operatingSystem: "Web browser",
+    inLanguage: ["pl-PL", "en-US"],
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "PLN",
+    },
+  };
+
   return (
     <main id="main-content" className="app-shell safe-area-inset">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} />
       {activeGame && (
         <div className="fixed top-12 sm:top-4 left-1/2 -translate-x-1/2 z-50 w-full px-2 sm:px-0 sm:w-auto">
           <ActiveGameBanner

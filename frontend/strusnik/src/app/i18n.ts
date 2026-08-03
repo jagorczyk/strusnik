@@ -134,8 +134,8 @@ export const I18N = {
 
 		home: {
 			eyebrow: 'STRUSNIK / centrum gry',
-			title: 'Zagraj po swojemu.',
-			subtitle: 'Wybierz szybka partie solo albo zapros znajomych do wspolnej rywalizacji.',
+			title: 'Darmowe gry online. Graj po swojemu.',
+			subtitle: 'Zagraj w szachy, Haxballa, Stratego i więcej. Wybierz partię solo albo zaproś znajomych do wspólnej rywalizacji.',
 			proof: '9 gier do wyboru • solo i multiplayer',
 			menu_label: 'Glowne menu',
 			single: 'Graj solo',
@@ -1076,8 +1076,8 @@ export const I18N = {
 
 		home: {
 			eyebrow: 'STRUSNIK / game center',
-			title: 'Play your way.',
-			subtitle: 'Choose a quick solo game or invite friends to compete together.',
+			title: 'Free online games. Play your way.',
+			subtitle: 'Play chess, Haxball, Stratego, and more. Choose a solo game or invite friends to compete together.',
 			proof: '9 games to choose from • solo and multiplayer',
 			menu_label: 'Main menu',
 			single: 'Play solo',
