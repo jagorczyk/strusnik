@@ -42,10 +42,10 @@ export const metadata: Metadata = {
       "Graj solo albo ze znajomymi w popularne gry online: szachy, Haxball, Stratego, Tysiąc i więcej.",
     images: [
       {
-        url: "/main/background.webp",
-        width: 1536,
-        height: 1024,
-        alt: "Strusnik – darmowe gry online",
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Strusnik – darmowe gry online: szachy, Haxball, Stratego, Tysiąc i Statki",
       },
     ],
   },
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Strusnik – darmowe gry online",
     description: "Darmowe gry online solo i multiplayer dla znajomych.",
-    images: ["/main/background.webp"],
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
