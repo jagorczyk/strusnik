@@ -132,7 +132,7 @@ export default function HaxballWaitingRoom({
           <header className="haxball-waiting-header">
             <div className="haxball-waiting-splash" aria-hidden="true">
               <Image
-                src="/gameTiles/tile_haxball.png"
+                src="/gameTiles/tile_haxball.webp"
                 alt=""
                 fill
                 priority

@@ -50,7 +50,7 @@ export default function TicTacToePage() {
 
       <div className="game-runtime-game relative z-10 w-full h-full">
         <div className="flex flex-col items-center gap-4 w-[min(400px,92vw)]">
-          <div className={plankClass} style={{ backgroundImage: "url('/main/button.png')" }}>
+          <div className={plankClass} style={{ backgroundImage: "url('/main/button.webp')" }}>
             <span className="text-lg">{statusText}</span>
           </div>
 
@@ -61,7 +61,7 @@ export default function TicTacToePage() {
           <button
             onClick={handleReset}
             className={plankClass + " hover:brightness-110 transition"}
-            style={{ backgroundImage: "url('/main/button.png')" }}
+            style={{ backgroundImage: "url('/main/button.webp')" }}
           >
             {t(lang, "tictactoe.new_game")}
           </button>

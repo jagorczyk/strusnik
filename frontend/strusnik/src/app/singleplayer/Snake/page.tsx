@@ -129,7 +129,7 @@ export default function SnakePage() {
 
       <div className="game-runtime-game relative z-10 w-full h-full">
         <div className="flex flex-col items-center gap-4 w-[min(680px,92vw)]">
-          <div className={plankClass} style={{ backgroundImage: "url('/main/button.png')" }}>
+          <div className={plankClass} style={{ backgroundImage: "url('/main/button.webp')" }}>
             <span className="text-lg">
               {t(lang, "snake.score")}: {score}
               {isSubmittingScore && t(lang, "snake.submitting")}
@@ -140,7 +140,7 @@ export default function SnakePage() {
             className="game-runtime-board-surface relative w-[min(680px,92vw,calc(100dvh-260px))] bg-no-repeat bg-center bg-contain"
             style={{
               aspectRatio: `${BOARD_IMG.w} / ${BOARD_IMG.h}`,
-              backgroundImage: "url('/snake/board.png')",
+              backgroundImage: "url('/snake/board.webp')",
               backgroundSize: "contain",
               padding: 0,
             }}
@@ -206,7 +206,7 @@ export default function SnakePage() {
             <button
               onClick={startGame}
               className={plankClass + " hover:brightness-110 transition"}
-              style={{ backgroundImage: "url('/main/button.png')" }}
+              style={{ backgroundImage: "url('/main/button.webp')" }}
             >
               {t(lang, "snake.play")}
             </button>
@@ -215,7 +215,7 @@ export default function SnakePage() {
           {gameStatus === "STARTED" && (
             <button
               className={plankClass + " hover:brightness-110 transition"}
-              style={{ backgroundImage: "url('/main/button.png')" }}
+              style={{ backgroundImage: "url('/main/button.webp')" }}
             >
               {t(lang, "snake.in_progress")}
             </button>
@@ -225,7 +225,7 @@ export default function SnakePage() {
             <button
               onClick={startGame}
               className={plankClass + " hover:brightness-110 transition"}
-              style={{ backgroundImage: "url('/main/button.png')" }}
+              style={{ backgroundImage: "url('/main/button.webp')" }}
             >
               {t(lang, "snake.play_again")}
             </button>

@@ -14,7 +14,7 @@ export default function Board({ board, onSquareClick }: BoardProps) {
                     onClick={() => onSquareClick(index)}
                     disabled={value !== ""}
                     className="game-runtime-tictactoe-cell w-24 h-24 text-white text-4xl font-bold disabled:cursor-not-allowed transition-transform bg-no-repeat bg-center bg-cover"
-                    style={{ backgroundImage: "url('/main/button.png')" }}
+                    style={{ backgroundImage: "url('/main/button.webp')" }}
                 >
                     {value}
                 </button>

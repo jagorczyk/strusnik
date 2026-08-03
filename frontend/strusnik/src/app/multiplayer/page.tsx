@@ -35,12 +35,12 @@ export default function MultiplayerGamesPage() {
                 </header>
 
                 <CardContainer>
-                    <Card imgSrc='/gameTiles/tile_tysiac.png' gameName='Tysiac' />
-                    <Card imgSrc='/gameTiles/tile_stratego.png' gameName='Stratego' />
-                    <Card imgSrc='/gameTiles/tile_chess.png' gameName='Chess' />
-                    <Card imgSrc='/gameTiles/tile_battleships.png' gameName='Battleships' />
-                    <Card imgSrc='/gameTiles/tile_set.png' gameName='Set' />
-                    <Card imgSrc='/gameTiles/tile_haxball.png' gameName='Haxball' />
+                    <Card imgSrc='/gameTiles/tile_tysiac.webp' gameName='Tysiac' />
+                    <Card imgSrc='/gameTiles/tile_stratego.webp' gameName='Stratego' />
+                    <Card imgSrc='/gameTiles/tile_chess.webp' gameName='Chess' />
+                    <Card imgSrc='/gameTiles/tile_battleships.webp' gameName='Battleships' />
+                    <Card imgSrc='/gameTiles/tile_set.webp' gameName='Set' />
+                    <Card imgSrc='/gameTiles/tile_haxball.webp' gameName='Haxball' />
                 </CardContainer>
             </div>
         </main>

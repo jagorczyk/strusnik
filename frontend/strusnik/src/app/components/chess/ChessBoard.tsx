@@ -43,17 +43,17 @@ function getPieceSprite(piece: { type: string; color: Color }) {
   const color = piece.color === 'w' ? 'white' : 'black';
   switch (piece.type) {
     case 'p':
-      return `/chess/pieces/${color}_pawn.png`;
+      return `/chess/pieces/${color}_pawn.webp`;
     case 'r':
-      return `/chess/pieces/${color}_rook.png`;
+      return `/chess/pieces/${color}_rook.webp`;
     case 'n':
-      return `/chess/pieces/${color}_knight.png`;
+      return `/chess/pieces/${color}_knight.webp`;
     case 'b':
-      return `/chess/pieces/${color}_bishop.png`;
+      return `/chess/pieces/${color}_bishop.webp`;
     case 'q':
-      return `/chess/pieces/${color}_queen.png`;
+      return `/chess/pieces/${color}_queen.webp`;
     case 'k':
-      return `/chess/pieces/${color}_king.png`;
+      return `/chess/pieces/${color}_king.webp`;
     default:
       return null;
   }
@@ -321,7 +321,7 @@ export default function ChessBoard({
     >
 
       <img
-        src="/chess/chessboard.png"
+        src="/chess/chessboard.webp"
         alt="Chessboard"
         className="absolute inset-0 w-full h-full object-cover"
         draggable={false}
@@ -422,7 +422,7 @@ export default function ChessBoard({
       })()}
 
       <img
-        src="/chess/frame.png"
+        src="/chess/frame.webp"
         alt="Frame"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         draggable={false}

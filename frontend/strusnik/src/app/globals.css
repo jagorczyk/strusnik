@@ -24,7 +24,7 @@
   --success: #59d38c;
   --focus: #ffb37d;
 
-  --bg-image: url("/main/background.png");
+  --bg-image: url("/main/background.webp");
   --bg-position: right bottom;
   --font-ui: var(--font-perciles), "Poppins", "Segoe UI", system-ui, sans-serif;
   --interface-scale: 0.8;

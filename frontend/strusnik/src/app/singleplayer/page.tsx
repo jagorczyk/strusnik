@@ -35,9 +35,9 @@ export default function SingleplayerGamesPage() {
                 </header>
 
                 <CardContainer>
-                    <Card imgSrc='/gameTiles/tile_blackjack.png' gameName='Blackjack' />
-                    <Card imgSrc='/gameTiles/tile_snake.png' gameName='Snake' />
-                    <Card imgSrc='/gameTiles/tile_tictactoe.png' gameName='TicTacToe' />
+                    <Card imgSrc='/gameTiles/tile_blackjack.webp' gameName='Blackjack' />
+                    <Card imgSrc='/gameTiles/tile_snake.webp' gameName='Snake' />
+                    <Card imgSrc='/gameTiles/tile_tictactoe.webp' gameName='TicTacToe' />
                 </CardContainer>
             </div>
         </main>
