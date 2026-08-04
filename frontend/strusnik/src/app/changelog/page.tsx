@@ -3,7 +3,8 @@
 import { Bug, Check, History, Sparkles, Wrench, type LucideIcon } from "lucide-react";
 import ReturnArrow from "../components/lobby/returnArrow";
 import ActiveGameBanner from "../components/lobby/ActiveGameBanner";
-import { CHANGELOG_ENTRIES, type ChangelogCategory } from "../data/changelog";
+import { CHANGELOG_ENTRIES, type ChangelogCategory, type ChangelogEntry } from "../data/changelog";
+import { useEffect, useState } from "react";
 import { useLang, type Lang } from "../lang";
 import { t } from "../i18n";
 import { useSocket } from "../hooks/useSocket";
@@ -13,6 +14,12 @@ const CATEGORY_CONFIG: Record<ChangelogCategory, { icon: LucideIcon; labelKey: s
   improved: { icon: Wrench, labelKey: "changelog.categories.improved" },
   fixed: { icon: Bug, labelKey: "changelog.categories.fixed" },
 };
+
+function mergeChangelogEntries(dynamicEntries: ChangelogEntry[]) {
+  const dynamicKeys = new Set(dynamicEntries.map((entry) => `${entry.date}:${entry.title.en}`));
+  const fallbackEntries = CHANGELOG_ENTRIES.filter((entry) => !dynamicKeys.has(`${entry.date}:${entry.title.en}`));
+  return [...dynamicEntries, ...fallbackEntries].sort((left, right) => right.date.localeCompare(left.date));
+}
 
 function formatDate(date: string, lang: Lang) {
   return new Intl.DateTimeFormat(lang === "pl" ? "pl-PL" : "en-US", {
@@ -26,6 +33,23 @@ function formatDate(date: string, lang: Lang) {
 export default function ChangelogPage() {
   const { lang } = useLang();
   const { activeGame, setActiveGame } = useSocket();
+  const [entries, setEntries] = useState<ChangelogEntry[]>(CHANGELOG_ENTRIES);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/changelog", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (cancelled || !Array.isArray(data?.entries)) return;
+        setEntries(mergeChangelogEntries(data.entries as ChangelogEntry[]));
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <main id="main-content" className="game-page-shell changelog-shell" aria-labelledby="changelog-title">
@@ -53,7 +77,7 @@ export default function ChangelogPage() {
         </header>
 
         <section className="changelog-list" aria-label={t(lang, "changelog.timeline_label")}>
-          {CHANGELOG_ENTRIES.map((entry, entryIndex) => (
+          {entries.map((entry, entryIndex) => (
             <article className="changelog-entry" key={entry.date}>
               <div className="changelog-entry__meta">
                 {entryIndex === 0 && (

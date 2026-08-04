@@ -9817,7 +9817,19 @@ html {
 .admin-action-badge--make_admin,
 .admin-action-badge--revoke_admin { background: rgba(142, 184, 255, 0.14); color: #a8c8ff; }
 .admin-action-badge--reset_stats,
-.admin-action-badge--notify { background: rgba(197, 162, 255, 0.14); color: #d5baff; }
+.admin-action-badge--notify,
+.admin-action-badge--changelog_create { background: rgba(197, 162, 255, 0.14); color: #d5baff; }
+
+.admin-changelog-list { display: grid; gap: 12px; }
+.admin-changelog-item { display: grid; gap: 8px; padding: 18px 20px; }
+.admin-changelog-item__meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; }
+.admin-changelog-item h3 { margin: 0; color: var(--text); font-size: 17px; }
+.admin-changelog-item p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.admin-changelog-item strong { color: var(--text); font-size: 13px; }
+.admin-changelog-item small { color: var(--muted); font-size: 11px; }
+.admin-status--new { color: var(--success); }
+.admin-status--improved { color: var(--focus); }
+.admin-status--fixed { color: var(--danger); }
 
 .admin-empty { display: grid; justify-items: center; gap: 8px; min-height: 220px; place-content: center; padding: 28px; border: 1px dashed var(--border-strong); border-radius: 14px; color: var(--muted); text-align: center; }
 .admin-empty svg { color: var(--amber); }
@@ -9840,9 +9852,13 @@ html {
 .admin-icon-button:hover { background: var(--surface-soft); color: var(--text); }
 .admin-form { display: grid; gap: 8px; }
 .admin-form label { color: var(--text-secondary); font-size: 13px; font-weight: 700; }
+.admin-form input,
 .admin-form textarea,
-.admin-form select { width: 100%; margin-bottom: 8px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; outline: 0; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; line-height: 1.45; resize: vertical; }
-.admin-form textarea::placeholder { color: var(--text-subtle); }
+.admin-form select { width: 100%; margin-bottom: 8px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 10px; outline: 0; background: var(--surface); color: var(--text); font: inherit; font-size: 14px; line-height: 1.45; }
+.admin-form textarea { resize: vertical; }
+.admin-form textarea::placeholder,
+.admin-form input::placeholder { color: var(--text-subtle); }
+.admin-form input:focus,
 .admin-form textarea:focus,
 .admin-form select:focus { border-color: var(--focus); box-shadow: 0 0 0 3px rgba(255, 179, 125, 0.12); }
 .admin-form select { cursor: pointer; }
