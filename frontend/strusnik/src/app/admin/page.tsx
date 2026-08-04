@@ -6,6 +6,7 @@ import {
     Activity,
     Ban as BanIcon,
     Bell,
+    Bug,
     Check,
     ChevronLeft,
     ChevronRight,
@@ -25,6 +26,7 @@ import {
     Sparkles,
     UserRound,
     Users,
+    Wrench,
     X,
     Zap,
     type LucideIcon,
@@ -187,10 +189,16 @@ const LOG_ACTIONS = [
 ];
 
 const CHANGELOG_CATEGORY_LABELS: Record<ChangelogCategory, string> = {
-    new: 'Nowe',
-    improved: 'Ulepszenia',
-    fixed: 'Poprawki',
+    new: 'Nowa rzecz',
+    improved: 'Ulepszenie',
+    fixed: 'Naprawa',
 };
+
+const CHANGELOG_CATEGORY_OPTIONS: Array<{ value: ChangelogCategory; label: string; description: string; icon: LucideIcon }> = [
+    { value: 'new', label: 'Nowa rzecz', description: 'Nowa funkcja, gra lub zawartosc.', icon: Sparkles },
+    { value: 'improved', label: 'Ulepszenie', description: 'Zmiana, ktora poprawia dzialanie.', icon: Wrench },
+    { value: 'fixed', label: 'Naprawa', description: 'Usuniety blad lub problem.', icon: Bug },
+];
 
 function createChangelogDraft(): ChangelogDraft {
     return {
@@ -997,12 +1005,27 @@ function ChangelogModal({ draft, pending, onChange, onSubmit, onClose }: { draft
                 <label htmlFor="changelog-summary-en">Opis EN</label>
                 <textarea id="changelog-summary-en" value={draft.summaryEn} onChange={(event) => onChange('summaryEn', event.target.value)} maxLength={2000} rows={3} />
 
-                <label htmlFor="changelog-category">Kategoria</label>
-                <select id="changelog-category" value={draft.category} onChange={(event) => onChange('category', event.target.value)}>
-                    <option value="new">Nowe</option>
-                    <option value="improved">Ulepszenia</option>
-                    <option value="fixed">Poprawki</option>
-                </select>
+                <fieldset className="admin-form__fieldset">
+                    <legend>Typ zmiany</legend>
+                    <div className="admin-category-grid">
+                        {CHANGELOG_CATEGORY_OPTIONS.map(({ value, label, description, icon: Icon }) => (
+                            <label className={`admin-category-option ${draft.category === value ? 'is-selected' : ''}`} key={value}>
+                                <input
+                                    type="radio"
+                                    name="changelog-category"
+                                    value={value}
+                                    checked={draft.category === value}
+                                    onChange={() => onChange('category', value)}
+                                />
+                                <span className="admin-category-option__icon" aria-hidden="true"><Icon size={17} /></span>
+                                <span className="admin-category-option__copy">
+                                    <strong>{label}</strong>
+                                    <small>{description}</small>
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                </fieldset>
 
                 <label htmlFor="changelog-item-pl">Opis zmiany PL</label>
                 <textarea id="changelog-item-pl" value={draft.itemPl} onChange={(event) => onChange('itemPl', event.target.value)} maxLength={1000} rows={3} />
