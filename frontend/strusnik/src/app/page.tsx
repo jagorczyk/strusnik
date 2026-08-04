@@ -8,7 +8,7 @@ import { useLang } from "./lang";
 import { t } from "./i18n";
 import { useSocket } from "./hooks/useSocket";
 import ActiveGameBanner from "./components/lobby/ActiveGameBanner";
-import { Gamepad2, Shield, Trophy, UserRound, UsersRound } from "lucide-react";
+import { ArrowUpRight, Gamepad2, History, Shield, Trophy, UserRound, UsersRound } from "lucide-react";
 
 export default function HomePage() {
   const { lang } = useLang();
@@ -78,45 +78,53 @@ export default function HomePage() {
             <p className="home-proof">{t(lang, "home.proof")}</p>
           </section>
 
-          <nav className="home-actions" aria-label={t(lang, "home.menu_label")}>
-            <Button
-              icon={<Gamepad2 size={20} />}
-              index={0}
-              text={t(lang, "home.single")}
-              description={t(lang, "home.single_desc")}
-              href="/singleplayer"
-            />
-            <Button
-              icon={<UsersRound size={20} />}
-              index={1}
-              text={t(lang, "home.multi")}
-              description={t(lang, "home.multi_desc")}
-              href="/multiplayer"
-            />
-            <Button
-              icon={<Trophy size={20} />}
-              index={2}
-              text={t(lang, "home.rankings")}
-              description={t(lang, "home.rankings_desc")}
-              href="/rankings"
-            />
-            <Button
-              icon={<UserRound size={20} />}
-              index={3}
-              text={t(lang, "home.profile")}
-              description={t(lang, "home.profile_desc")}
-              href="/profile"
-            />
-            {isAdmin && (
+          <div className="home-actions-column">
+            <nav className="home-actions" aria-label={t(lang, "home.menu_label")}>
               <Button
-                icon={<Shield size={20} />}
-                index={4}
-                text={t(lang, "home.admin")}
-                description={t(lang, "home.admin_desc")}
-                href="/admin"
+                icon={<Gamepad2 size={20} />}
+                index={0}
+                text={t(lang, "home.single")}
+                description={t(lang, "home.single_desc")}
+                href="/singleplayer"
               />
-            )}
-          </nav>
+              <Button
+                icon={<UsersRound size={20} />}
+                index={1}
+                text={t(lang, "home.multi")}
+                description={t(lang, "home.multi_desc")}
+                href="/multiplayer"
+              />
+              <Button
+                icon={<Trophy size={20} />}
+                index={2}
+                text={t(lang, "home.rankings")}
+                description={t(lang, "home.rankings_desc")}
+                href="/rankings"
+              />
+              <Button
+                icon={<UserRound size={20} />}
+                index={3}
+                text={t(lang, "home.profile")}
+                description={t(lang, "home.profile_desc")}
+                href="/profile"
+              />
+              {isAdmin && (
+                <Button
+                  icon={<Shield size={20} />}
+                  index={4}
+                  text={t(lang, "home.admin")}
+                  description={t(lang, "home.admin_desc")}
+                  href="/admin"
+                />
+              )}
+            </nav>
+            <Link className="home-changelog-link" href="/changelog">
+              <History size={17} aria-hidden="true" />
+              <span>{t(lang, "home.changelog")}</span>
+              <ArrowUpRight size={16} aria-hidden="true" />
+              <span className="sr-only">{t(lang, "home.changelog_desc")}</span>
+            </Link>
+          </div>
         </div>
       </div>
     </main>

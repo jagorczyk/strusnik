@@ -144,11 +144,27 @@ export const I18N = {
 			multi_desc: 'Dolacz do pokoju albo zapros znajomych.',
 			rankings: 'Sprawdz rankingi',
 			rankings_desc: 'Zobacz, kto prowadzi w kazdej grze.',
+			changelog: 'Historia zmian',
+			changelog_desc: 'Zobacz, co nowego pojawilo sie w Strusniku.',
 			profile: 'Otworz profil',
 			profile_desc: 'Sprawdz wyniki i ustaw avatar.',
 			admin: 'Panel administratora',
 			admin_desc: 'Zarzadzaj graczami i rozgrywkami.',
 			logout: 'Wyloguj sie',
+		},
+
+		changelog: {
+			kicker: 'STRUSNIK / ZMIANY',
+			title: 'Historia zmian',
+			subtitle: 'Najwazniejsze nowe funkcje, ulepszenia i poprawki w jednym miejscu.',
+			back: 'WROC',
+			latest: 'NAJNOWSZE',
+			timeline_label: 'HISTORIA ZMIAN',
+			categories: {
+				new: 'NOWE',
+				improved: 'ULEPSZENIA',
+				fixed: 'POPRAWKI',
+			},
 		},
 
 		guest: {
@@ -1086,11 +1102,27 @@ export const I18N = {
 			multi_desc: 'Join a room or invite friends to play.',
 			rankings: 'View rankings',
 			rankings_desc: 'See who leads each game.',
+			changelog: 'Changelog',
+			changelog_desc: 'See what is new in Strusnik.',
 			profile: 'Open profile',
 			profile_desc: 'Check your results and set an avatar.',
 			admin: 'Admin panel',
 			admin_desc: 'Manage players and games.',
 			logout: 'Log out',
+		},
+
+		changelog: {
+			kicker: 'STRUSNIK / CHANGELOG',
+			title: 'Changelog',
+			subtitle: 'The latest features, improvements, and fixes in one place.',
+			back: 'BACK',
+			latest: 'LATEST',
+			timeline_label: 'CHANGELOG HISTORY',
+			categories: {
+				new: 'NEW',
+				improved: 'IMPROVEMENTS',
+				fixed: 'FIXES',
+			},
 		},
 
 		guest: {

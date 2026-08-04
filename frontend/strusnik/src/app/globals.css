@@ -15242,3 +15242,328 @@ button.haxball-seat:hover:not(:disabled) {
     transform: none;
   }
 }
+
+.home-actions-column {
+  width: 100%;
+  max-width: 680px;
+  margin-inline-start: auto;
+}
+
+.home-actions-column .home-actions {
+  max-width: none;
+  margin-inline-start: 0;
+}
+
+.home-changelog-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-raised) 82%, transparent);
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1), background-color 220ms ease, border-color 220ms ease, color 220ms ease;
+}
+
+.home-changelog-link:hover {
+  transform: translateY(-2px);
+  border-color: var(--amber);
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.home-changelog-link:active {
+  transform: scale(0.96);
+}
+
+.home-changelog-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.home-changelog-link > svg:last-of-type {
+  transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1), color 220ms ease;
+}
+
+.home-changelog-link:hover > svg:last-of-type {
+  transform: translate(2px, -2px);
+  color: var(--amber);
+}
+
+.changelog-shell {
+  place-items: start center;
+  padding-top: 104px;
+}
+
+.changelog-frame {
+  width: min(100%, 1080px);
+  min-width: 0;
+  padding: 32px;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(16px);
+}
+
+.changelog-header {
+  padding: 8px;
+  animation: motion-enter 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.changelog-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  color: var(--amber);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.changelog-header h1 {
+  max-width: 680px;
+  margin: 0;
+  color: var(--text);
+  font-size: 3rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.changelog-header__subtitle {
+  max-width: 56ch;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.changelog-list {
+  display: grid;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.changelog-entry {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 24px;
+  min-width: 0;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-raised) 76%, transparent);
+  animation: motion-enter 760ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.changelog-entry:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.changelog-entry__meta {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.changelog-entry__meta time {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.changelog-entry__latest {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 28px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--amber) 42%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--amber) 12%, transparent);
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.changelog-entry__body {
+  min-width: 0;
+}
+
+.changelog-entry__body h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.875rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.changelog-entry__summary {
+  max-width: 64ch;
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.changelog-groups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.changelog-group {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+}
+
+.changelog-group__heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.changelog-group__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--amber) 42%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--amber) 12%, transparent);
+  color: var(--amber);
+}
+
+.changelog-group--fixed .changelog-group__icon {
+  border-color: color-mix(in srgb, var(--danger) 42%, transparent);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+}
+
+.changelog-group h3 {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.changelog-group ul {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding-inline-start: 16px;
+}
+
+.changelog-group li {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.changelog-group li::marker {
+  color: var(--amber);
+}
+
+.changelog-group--fixed li::marker {
+  color: var(--danger);
+}
+
+@media (max-width: 760px) {
+  .changelog-frame {
+    padding: 24px;
+  }
+
+  .changelog-entry {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .changelog-entry__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .changelog-groups {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 699px) {
+  .home-actions-column {
+    margin-inline: auto;
+  }
+
+  .home-changelog-link {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .changelog-shell {
+    padding: 80px 16px 32px;
+  }
+
+  .changelog-frame {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .changelog-header {
+    padding: 8px 0;
+  }
+
+  .changelog-header h1 {
+    font-size: 2.25rem;
+  }
+
+  .changelog-header__subtitle,
+  .changelog-entry__summary {
+    font-size: 14px;
+  }
+
+  .changelog-list {
+    margin-top: 24px;
+  }
+
+  .changelog-entry {
+    padding: 16px;
+  }
+
+  .changelog-entry__body h2 {
+    font-size: 1.5rem;
+  }
+}
