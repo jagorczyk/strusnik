@@ -44,14 +44,16 @@ export default function Card({ gameName, imgSrc, index = 0 }: CardProps) {
     <Link
       href={getGameLink()}
       className="game-card"
-      style={{ "--card-delay": `${120 + index * 80}ms` } as React.CSSProperties}
+      prefetch={false}
+      style={{ "--card-delay": `${40 + index * 40}ms` } as React.CSSProperties}
     >
       <span className="game-card__image">
         <Image
           alt=""
           src={imgSrc}
           fill
-          sizes="(max-width: 390px) 100vw, (max-width: 720px) 50vw, 25vw"
+          loading={index < 4 ? "eager" : "lazy"}
+          sizes="(max-width: 720px) 50vw, 240px"
         />
         <span className="game-card__glow" aria-hidden="true" />
       </span>
