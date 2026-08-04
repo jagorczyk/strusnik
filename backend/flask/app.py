@@ -14,6 +14,7 @@ from routes.snake import snake
 from routes.rankings import rankings
 from routes.tictactoe import tictactoe
 from routes.admin import admin
+from routes.changelog import changelog
 from routes.profile import profile
 from routes.friends import friends
 from models import db
@@ -51,6 +52,7 @@ app.register_blueprint(rankings, url_prefix="/api/rankings")
 app.register_blueprint(snake, url_prefix="/api/snake")
 app.register_blueprint(tictactoe, url_prefix="/api/games/tictactoe")
 app.register_blueprint(admin, url_prefix="/api/admin")
+app.register_blueprint(changelog, url_prefix="/api/changelog")
 app.register_blueprint(profile, url_prefix="/api/profile")
 app.register_blueprint(friends, url_prefix="/api/friends")
 

@@ -11,6 +11,7 @@ from models.SinglePlayerStats import SinglePlayerStats
 from models.FriendRequest import FriendRequest
 from models.Friendship import Friendship
 from models.HaxballMatch import HaxballMatch, HaxballMatchParticipant
+from models.ChangelogPost import ChangelogPost
 
 __all__ = [
     "db",
@@ -24,4 +25,5 @@ __all__ = [
     "Friendship",
     "HaxballMatch",
     "HaxballMatchParticipant",
+    "ChangelogPost",
 ]

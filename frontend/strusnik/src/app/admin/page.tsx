@@ -16,11 +16,13 @@ import {
     LayoutDashboard,
     LoaderCircle,
     LogOut,
+    Plus,
     RefreshCw,
     RotateCcw,
     Search,
     Shield,
     ShieldCheck,
+    Sparkles,
     UserRound,
     Users,
     X,
@@ -116,7 +118,35 @@ interface OnlineUser {
     status: string;
 }
 
-type TabType = 'overview' | 'users' | 'bans' | 'logs';
+type ChangelogCategory = 'new' | 'improved' | 'fixed';
+
+type ChangelogCopy = {
+    pl: string;
+    en: string;
+};
+
+interface AdminChangelogEntry {
+    id: number;
+    date: string;
+    title: ChangelogCopy;
+    summary: ChangelogCopy;
+    groups: Array<{ category: ChangelogCategory; items: ChangelogCopy[] }>;
+    created_at: string;
+    created_by: string | null;
+}
+
+type ChangelogDraft = {
+    date: string;
+    titlePl: string;
+    titleEn: string;
+    summaryPl: string;
+    summaryEn: string;
+    category: ChangelogCategory;
+    itemPl: string;
+    itemEn: string;
+};
+
+type TabType = 'overview' | 'users' | 'bans' | 'logs' | 'changelog';
 type UserFilter = 'all' | 'active' | 'banned' | 'admins';
 
 type ConfirmAction = {
@@ -131,6 +161,7 @@ const TAB_ITEMS: Array<{ id: TabType; label: string; icon: LucideIcon }> = [
     { id: 'users', label: 'Uzytkownicy', icon: Users },
     { id: 'bans', label: 'Blokady', icon: BanIcon },
     { id: 'logs', label: 'Logi akcji', icon: FileText },
+    { id: 'changelog', label: 'Wpisy zmian', icon: Sparkles },
 ];
 
 const USER_FILTERS: Array<{ value: UserFilter; label: string }> = [
@@ -152,7 +183,27 @@ const LOG_ACTIONS = [
     { value: 'guest_ban', label: 'Blokady gosci' },
     { value: 'guest_unban', label: 'Odblokowania gosci' },
     { value: 'guest_kick', label: 'Wyrzucenia gosci' },
+    { value: 'changelog_create', label: 'Wpisy zmian' },
 ];
+
+const CHANGELOG_CATEGORY_LABELS: Record<ChangelogCategory, string> = {
+    new: 'Nowe',
+    improved: 'Ulepszenia',
+    fixed: 'Poprawki',
+};
+
+function createChangelogDraft(): ChangelogDraft {
+    return {
+        date: new Date().toISOString().slice(0, 10),
+        titlePl: '',
+        titleEn: '',
+        summaryPl: '',
+        summaryEn: '',
+        category: 'new',
+        itemPl: '',
+        itemEn: '',
+    };
+}
 
 export default function AdminPanel() {
     const router = useRouter();
@@ -167,6 +218,7 @@ export default function AdminPanel() {
     const [bans, setBans] = useState<Ban[]>([]);
     const [guestBans, setGuestBans] = useState<GuestBan[]>([]);
     const [logs, setLogs] = useState<AdminLog[]>([]);
+    const [changelogEntries, setChangelogEntries] = useState<AdminChangelogEntry[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
     const [stats, setStats] = useState<Stats | null>(null);
 
@@ -202,6 +254,8 @@ export default function AdminPanel() {
     const [messageModalOpen, setMessageModalOpen] = useState(false);
     const [messageText, setMessageText] = useState('');
     const [messageTarget, setMessageTarget] = useState('all');
+    const [changelogModalOpen, setChangelogModalOpen] = useState(false);
+    const [changelogDraft, setChangelogDraft] = useState<ChangelogDraft>(() => createChangelogDraft());
     const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
     const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
     const detailsRequestRef = useRef(0);
@@ -283,6 +337,11 @@ export default function AdminPanel() {
         setTotalLogsPages(data.pages || 1);
     }, [apiRequest, logAction, logsPage]);
 
+    const fetchChangelog = useCallback(async () => {
+        const data = await apiRequest<{ entries: AdminChangelogEntry[] }>('/api/admin/changelog');
+        setChangelogEntries(data.entries);
+    }, [apiRequest]);
+
     const refreshCurrentTab = useCallback(async () => {
         setLoading(true);
         setError(null);
@@ -291,12 +350,13 @@ export default function AdminPanel() {
             if (activeTab === 'users') await fetchUsers();
             if (activeTab === 'bans') await Promise.all([fetchBans(), fetchGuestBans()]);
             if (activeTab === 'logs') await fetchLogs();
+            if (activeTab === 'changelog') await fetchChangelog();
         } catch (requestError) {
             setError(requestError instanceof Error ? requestError.message : 'Nie udalo sie odswiezyc danych.');
         } finally {
             setLoading(false);
         }
-    }, [activeTab, fetchBans, fetchGuestBans, fetchLogs, fetchOnlineUsers, fetchStats, fetchUsers]);
+    }, [activeTab, fetchBans, fetchChangelog, fetchGuestBans, fetchLogs, fetchOnlineUsers, fetchStats, fetchUsers]);
 
     useEffect(() => {
         void checkAdmin();
@@ -583,6 +643,46 @@ export default function AdminPanel() {
         });
     };
 
+    const openChangelogModal = () => {
+        setChangelogDraft(createChangelogDraft());
+        setChangelogModalOpen(true);
+        setError(null);
+    };
+
+    const updateChangelogDraft = <K extends keyof ChangelogDraft>(field: K, value: ChangelogDraft[K]) => {
+        setChangelogDraft((current) => ({ ...current, [field]: value }));
+    };
+
+    const handleCreateChangelog = async () => {
+        const draft = changelogDraft;
+        if (!draft.titlePl.trim() || !draft.titleEn.trim() || !draft.summaryPl.trim() || !draft.summaryEn.trim() || !draft.itemPl.trim() || !draft.itemEn.trim()) {
+            setError('Uzupelnij wszystkie wersje jezykowe wpisu.');
+            return;
+        }
+
+        setActionPending('changelog-create');
+        setError(null);
+        try {
+            const data = await apiRequest<{ message: string }>('/api/admin/changelog', {
+                method: 'POST',
+                body: JSON.stringify({
+                    date: draft.date,
+                    title: { pl: draft.titlePl.trim(), en: draft.titleEn.trim() },
+                    summary: { pl: draft.summaryPl.trim(), en: draft.summaryEn.trim() },
+                    category: draft.category,
+                    item: { pl: draft.itemPl.trim(), en: draft.itemEn.trim() },
+                }),
+            });
+            setChangelogModalOpen(false);
+            notify(data.message, 'success');
+            await Promise.all([fetchChangelog(), fetchStats()]);
+        } catch (requestError) {
+            setError(requestError instanceof Error ? requestError.message : 'Nie udalo sie dodac wpisu zmian.');
+        } finally {
+            setActionPending(null);
+        }
+    };
+
     const handleSendMessage = async () => {
         if (!messageText.trim()) {
             setError('Wpisz tresc komunikatu.');
@@ -825,6 +925,18 @@ export default function AdminPanel() {
                             <Pagination currentPage={logsPage} totalPages={totalLogsPages} onPageChange={setLogsPage} />
                         </section>
                     )}
+
+                    {activeTab === 'changelog' && (
+                        <section id="admin-panel-changelog" role="tabpanel" aria-labelledby="admin-tab-button-changelog" tabIndex={0}>
+                            <SectionHeader
+                                eyebrow="Publiczna historia"
+                                title="Wpisy zmian"
+                                description="Dodawaj nowe funkcje, ulepszenia i poprawki widoczne na stronie changelogu."
+                                action={<button type="button" className="admin-button admin-button--primary" onClick={openChangelogModal}><Plus size={16} aria-hidden="true" />Dodaj wpis</button>}
+                            />
+                            <ChangelogAdminList entries={changelogEntries} />
+                        </section>
+                    )}
                 </div>
             </div>
 
@@ -832,8 +944,74 @@ export default function AdminPanel() {
             {guestBanModalOpen && selectedGuest && <GuestBanModal guest={selectedGuest} reason={banReason} duration={banDuration} pending={actionPending === `guest-ban-${selectedGuest.guest_token}`} onReasonChange={setBanReason} onDurationChange={setBanDuration} onSubmit={() => void handleBanGuest()} onClose={closeGuestBanModal} />}
             {details && <DetailsModal details={details} loading={detailsLoading} currentAdminId={currentAdminId} actionPending={actionPending} onClose={closeDetails} onResetStats={confirmResetStats} />}
             {messageModalOpen && <MessageModal onlineUsers={onlineUsers} message={messageText} target={messageTarget} pending={actionPending === 'notify'} onMessageChange={setMessageText} onTargetChange={setMessageTarget} onSubmit={() => void handleSendMessage()} onClose={() => { setMessageModalOpen(false); setMessageText(''); setMessageTarget('all'); }} />}
+            {changelogModalOpen && <ChangelogModal draft={changelogDraft} pending={actionPending === 'changelog-create'} onChange={updateChangelogDraft} onSubmit={() => void handleCreateChangelog()} onClose={() => setChangelogModalOpen(false)} />}
             {confirmAction && <ConfirmDialog action={confirmAction} pending={Boolean(actionPending)} onCancel={() => setConfirmAction(null)} />}
         </main>
+    );
+}
+
+function ChangelogAdminList({ entries }: { entries: AdminChangelogEntry[] }) {
+    if (!entries.length) {
+        return <EmptyState icon={Sparkles} title="Brak wpisow" description="Dodaj pierwszy wpis zmian, aby pokazac go na stronie changelogu." />;
+    }
+
+    return (
+        <div className="admin-changelog-list">
+            {entries.map((entry) => {
+                const group = entry.groups[0];
+                const category = group?.category || 'new';
+                const item = group?.items[0];
+                return (
+                    <article className="admin-card admin-changelog-item" key={entry.id}>
+                        <div className="admin-changelog-item__meta">
+                            <span className={`admin-status admin-status--${category}`}>{CHANGELOG_CATEGORY_LABELS[category]}</span>
+                            <time dateTime={entry.date}>{formatDate(entry.date)}</time>
+                        </div>
+                        <h3>{entry.title.pl}</h3>
+                        <p>{entry.summary.pl}</p>
+                        {item && <strong>{item.pl}</strong>}
+                        <small>EN: {entry.title.en}</small>
+                    </article>
+                );
+            })}
+        </div>
+    );
+}
+
+function ChangelogModal({ draft, pending, onChange, onSubmit, onClose }: { draft: ChangelogDraft; pending: boolean; onChange: (field: keyof ChangelogDraft, value: string) => void; onSubmit: () => void; onClose: () => void }) {
+    return (
+        <ModalShell title="Dodaj wpis zmian" description="Wpis pojawi sie na publicznej stronie changelogu po zapisaniu." onClose={onClose}>
+            <div className="admin-form">
+                <label htmlFor="changelog-date">Data publikacji</label>
+                <input id="changelog-date" type="date" value={draft.date} onChange={(event) => onChange('date', event.target.value)} />
+
+                <label htmlFor="changelog-title-pl">Tytul PL</label>
+                <input id="changelog-title-pl" value={draft.titlePl} onChange={(event) => onChange('titlePl', event.target.value)} maxLength={200} autoFocus />
+
+                <label htmlFor="changelog-title-en">Tytul EN</label>
+                <input id="changelog-title-en" value={draft.titleEn} onChange={(event) => onChange('titleEn', event.target.value)} maxLength={200} />
+
+                <label htmlFor="changelog-summary-pl">Opis PL</label>
+                <textarea id="changelog-summary-pl" value={draft.summaryPl} onChange={(event) => onChange('summaryPl', event.target.value)} maxLength={2000} rows={3} />
+
+                <label htmlFor="changelog-summary-en">Opis EN</label>
+                <textarea id="changelog-summary-en" value={draft.summaryEn} onChange={(event) => onChange('summaryEn', event.target.value)} maxLength={2000} rows={3} />
+
+                <label htmlFor="changelog-category">Kategoria</label>
+                <select id="changelog-category" value={draft.category} onChange={(event) => onChange('category', event.target.value)}>
+                    <option value="new">Nowe</option>
+                    <option value="improved">Ulepszenia</option>
+                    <option value="fixed">Poprawki</option>
+                </select>
+
+                <label htmlFor="changelog-item-pl">Opis zmiany PL</label>
+                <textarea id="changelog-item-pl" value={draft.itemPl} onChange={(event) => onChange('itemPl', event.target.value)} maxLength={1000} rows={3} />
+
+                <label htmlFor="changelog-item-en">Opis zmiany EN</label>
+                <textarea id="changelog-item-en" value={draft.itemEn} onChange={(event) => onChange('itemEn', event.target.value)} maxLength={1000} rows={3} />
+            </div>
+            <ModalActions primaryLabel="Dodaj wpis" primaryIcon={Plus} pending={pending} onPrimary={onSubmit} onClose={onClose} />
+        </ModalShell>
     );
 }
 

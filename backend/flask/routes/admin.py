@@ -1,14 +1,31 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from functools import wraps
 
 from flask import Blueprint, jsonify, request
 
 from api_utils import error_response, json_body, log_exception
-from models import AdminLog, Ban, GameStats, GuestBan, User, db
+from models import AdminLog, Ban, ChangelogPost, GameStats, GuestBan, User, db
 from sockets.socket_manager import active_sessions, is_guest_token, socket
 from utils import is_token_valid, parse_jwt_token
 
 admin = Blueprint("admin", __name__)
+
+_CHANGELOG_CATEGORIES = {"new", "improved", "fixed"}
+
+
+def _localized_text(data, field, max_length):
+    value = data.get(field)
+    if not isinstance(value, dict):
+        return None
+    polish = value.get("pl")
+    english = value.get("en")
+    if not isinstance(polish, str) or not isinstance(english, str):
+        return None
+    polish = polish.strip()
+    english = english.strip()
+    if not polish or not english or len(polish) > max_length or len(english) > max_length:
+        return None
+    return polish, english
 
 
 def get_current_user():
@@ -111,6 +128,70 @@ def _admin_user_dict(user):
     data = user.to_dict()
     data.pop("avatar_url", None)
     return data
+
+
+@admin.route("/changelog", methods=["GET"])
+@admin_required
+def get_changelog_entries():
+    entries = ChangelogPost.query.order_by(ChangelogPost.date.desc(), ChangelogPost.created_at.desc()).all()
+    return jsonify({
+        "entries": [entry.to_dict(include_admin_meta=True) for entry in entries],
+        "total": len(entries),
+    })
+
+
+@admin.route("/changelog", methods=["POST"])
+@admin_required
+def create_changelog_entry():
+    current_user = get_current_user()
+    data = json_body()
+    title = _localized_text(data, "title", 200)
+    summary = _localized_text(data, "summary", 2000)
+    item = _localized_text(data, "item", 1000)
+    category = data.get("category")
+    raw_date = data.get("date")
+
+    if not title:
+        return error_response("Tytul musi zawierac wersje polska i angielska.", 400)
+    if not summary:
+        return error_response("Opis musi zawierac wersje polska i angielska.", 400)
+    if not item:
+        return error_response("Opis zmiany musi zawierac wersje polska i angielska.", 400)
+    if category not in _CHANGELOG_CATEGORIES:
+        return error_response("Kategoria zmiany jest nieprawidlowa.", 400)
+
+    entry_date = date.today()
+    if raw_date:
+        if not isinstance(raw_date, str):
+            return error_response("Data zmiany jest nieprawidlowa.", 400)
+        try:
+            entry_date = date.fromisoformat(raw_date)
+        except ValueError:
+            return error_response("Data zmiany jest nieprawidlowa.", 400)
+
+    try:
+        entry = ChangelogPost(
+            date=entry_date,
+            title_pl=title[0],
+            title_en=title[1],
+            summary_pl=summary[0],
+            summary_en=summary[1],
+            category=category,
+            item_pl=item[0],
+            item_en=item[1],
+            created_by_id=current_user.id,
+        )
+        db.session.add(entry)
+        db.session.commit()
+        log_admin_action(current_user.id, "changelog_create", details=f"Title: {title[1]}")
+        return jsonify({
+            "message": "Wpis changelogu zostal dodany.",
+            "entry": entry.to_dict(include_admin_meta=True),
+        }), 201
+    except Exception as error:
+        db.session.rollback()
+        log_exception("Unable to create changelog entry", error)
+        return error_response("Nie udalo sie dodac wpisu changelogu.", 500)
 
 
 @admin.route("/users", methods=["GET"])
