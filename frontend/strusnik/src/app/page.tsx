@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import Button from "./components/main/button";
 import { useLang } from "./lang";
 import { t } from "./i18n";
@@ -118,7 +118,11 @@ export default function HomePage() {
                 />
               )}
             </nav>
-            <Link className="home-changelog-link" href="/changelog">
+            <Link
+              className="home-changelog-link"
+              href="/changelog"
+              style={{ "--action-delay": `${180 + (isAdmin ? 5 : 4) * 90}ms` } as CSSProperties}
+            >
               <History size={17} aria-hidden="true" />
               <span>{t(lang, "home.changelog")}</span>
               <ArrowUpRight size={16} aria-hidden="true" />
