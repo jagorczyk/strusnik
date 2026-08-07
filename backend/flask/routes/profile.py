@@ -1,11 +1,26 @@
 import base64
 import binascii
+from datetime import datetime
 
 from flask import Blueprint, jsonify, make_response, request
 
 from api_utils import error_response, json_body, log_exception
-from models import HaxballMatch, HaxballMatchParticipant, GameStats, SinglePlayerStats, User, db
-from utils import is_token_valid, parse_jwt_token
+from models import (
+    GameMatchHistory,
+    GameRating,
+    GameStats,
+    HaxballMatch,
+    HaxballMatchParticipant,
+    SinglePlayerStats,
+    User,
+    db,
+)
+from utils import (
+    RANKED_GAME_ORDER,
+    RANKED_INITIAL_RATING,
+    is_token_valid,
+    parse_jwt_token,
+)
 
 profile = Blueprint("profile", __name__)
 
@@ -208,6 +223,85 @@ def get_profile_data(user):
         current["best_score"] = max(current["best_score"], stat.best_score or 0)
         current["games_played"] += stat.games_played or 0
 
+    ratings_by_game = {
+        rating.game_name: rating
+        for rating in GameRating.query.filter_by(user_id=user.id).all()
+    }
+    elo = []
+    for game_name in RANKED_GAME_ORDER:
+        leaderboard = (
+            GameRating.query
+            .filter_by(game_name=game_name)
+            .join(User)
+            .order_by(GameRating.rating.desc(), GameRating.wins.desc(), User.username.asc())
+            .all()
+        )
+        rating = ratings_by_game.get(game_name)
+        games_played = (rating.games_played or 0) if rating else 0
+        has_played_ranked_game = games_played > 0
+        position = next(
+            (index for index, entry in enumerate(leaderboard, start=1) if entry.user_id == user.id),
+            None,
+        )
+        elo.append({
+            "game": game_name,
+            "rating": rating.rating if has_played_ranked_game else RANKED_INITIAL_RATING,
+            "games_played": games_played,
+            "wins": rating.wins if rating else 0,
+            "losses": rating.losses if rating else 0,
+            "draws": rating.draws if rating else 0,
+            "peak_rating": rating.peak_rating if has_played_ranked_game else RANKED_INITIAL_RATING,
+            "provisional": games_played < 10,
+            "position": position,
+            "rank": position,
+            "total_players": len(leaderboard),
+        })
+
+    history_items = []
+    for entry in GameMatchHistory.query.filter_by(user_id=user.id).all():
+        history_items.append((entry.played_at or datetime.min, entry.to_dict()))
+
+    haxball_matches = (
+        HaxballMatch.query
+        .join(HaxballMatchParticipant)
+        .filter(HaxballMatchParticipant.user_id == user.id)
+        .order_by(HaxballMatch.ended_at.desc())
+        .all()
+    )
+    for match in haxball_matches:
+        participant = next(
+            (item for item in match.participants if item.user_id == user.id),
+            None,
+        )
+        if not participant:
+            continue
+        history_items.append((match.ended_at or datetime.min, {
+            "id": f"haxball:{match.match_id}",
+            "match_id": match.match_id,
+            "game": "haxball",
+            "mode": "casual",
+            "result": participant.result,
+            "opponents": [
+                item.player_name
+                for item in match.participants
+                if item.id != participant.id
+            ],
+            "played_at": match.ended_at.isoformat() if match.ended_at else None,
+            "elo_before": None,
+            "elo_after": None,
+            "elo_delta": None,
+            "details": {
+                "map_id": match.map_id,
+                "duration_min": match.duration_min,
+                "score": {"red": match.score_red, "blue": match.score_blue},
+                "goals": participant.goals,
+                "assists": participant.assists,
+            },
+        }))
+
+    history_items.sort(key=lambda item: item[0], reverse=True)
+    history = [entry for _, entry in history_items]
+
     return jsonify({
         "username": user.username,
         "created_at": user.created_at.isoformat() if user.created_at else None,
@@ -225,6 +319,8 @@ def get_profile_data(user):
             "assists": sum(item["assists"] for item in multiplayer_by_game.values()),
             "by_game": multiplayer_by_game,
         },
+        "elo": elo,
+        "history": history,
         "singleplayer": {"by_game": singleplayer_by_game},
     })
 

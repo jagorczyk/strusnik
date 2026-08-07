@@ -230,12 +230,21 @@ class Stratego(MultiplayerGame):
 
     def _end_game(self, winner_idx, reason):
         self.game_state['stage'] = 'game_over'
-        self.game_state['winner'] = {'name': self.seats[winner_idx]['name'], 'reason': reason}
+        self.game_state['winner'] = {
+            'name': self.seats[winner_idx]['name'],
+            'userId': self.seats[winner_idx].get('userId'),
+            'reason': reason,
+        }
         self._record_win(winner_idx)
 
     def _record_win(self, winner_idx: int) -> None:
         try:
-            record_multiplayer_result('Stratego', self.seats, [winner_idx])
+            record_multiplayer_result(
+                'Stratego',
+                self.seats,
+                [winner_idx],
+                mode=getattr(self, 'matchmaking_mode', 'casual'),
+            )
         except Exception as error:
             db.session.rollback()
             if current_app:

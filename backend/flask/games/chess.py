@@ -216,7 +216,12 @@ class chess(MultiplayerGame):
     def _record_win(self, winner_color: Color) -> None:
         try:
             winner_index = 0 if winner_color == "w" else 1
-            record_multiplayer_result("chess", self.seats, [winner_index])
+            record_multiplayer_result(
+                "chess",
+                self.seats,
+                [winner_index],
+                mode=getattr(self, "matchmaking_mode", "casual"),
+            )
         except Exception as error:
             db.session.rollback()
             if current_app:
@@ -224,7 +229,12 @@ class chess(MultiplayerGame):
 
     def _record_draw(self) -> None:
         try:
-            record_multiplayer_result("chess", self.seats, draw=True)
+            record_multiplayer_result(
+                "chess",
+                self.seats,
+                draw=True,
+                mode=getattr(self, "matchmaking_mode", "casual"),
+            )
         except Exception as error:
             db.session.rollback()
             if current_app:

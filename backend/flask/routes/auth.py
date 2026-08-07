@@ -6,7 +6,20 @@ from sqlalchemy import or_
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from api_utils import error_response, json_body, log_exception
-from models import AdminLog, Ban, FriendRequest, Friendship, GameStats, GuestBan, SinglePlayerStats, User, db
+from models import (
+    AdminLog,
+    Ban,
+    FriendRequest,
+    Friendship,
+    GameMatchHistory,
+    GameRating,
+    GameStats,
+    GuestBan,
+    HaxballMatchParticipant,
+    SinglePlayerStats,
+    User,
+    db,
+)
 from utils import create_jwt_token, is_token_valid, parse_jwt_token
 
 authentication = Blueprint("authentication", __name__)
@@ -243,6 +256,11 @@ def delete_account():
             or_(Friendship.user_one_id == user_id, Friendship.user_two_id == user_id)
         ).delete(synchronize_session=False)
         db.session.query(GameStats).filter(GameStats.user_id == user_id).delete(synchronize_session=False)
+        db.session.query(GameRating).filter(GameRating.user_id == user_id).delete(synchronize_session=False)
+        db.session.query(GameMatchHistory).filter(GameMatchHistory.user_id == user_id).delete(synchronize_session=False)
+        db.session.query(HaxballMatchParticipant).filter(HaxballMatchParticipant.user_id == user_id).update(
+            {"user_id": None}, synchronize_session=False
+        )
         db.session.query(SinglePlayerStats).filter(SinglePlayerStats.user_id == user_id).delete(synchronize_session=False)
         db.session.query(Ban).filter(
             or_(Ban.user_id == user_id, Ban.banned_by_id == user_id, Ban.unbanned_by_id == user_id)

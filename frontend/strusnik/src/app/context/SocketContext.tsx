@@ -86,6 +86,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
                 token: String(user.userId),
                 username: user.nickname,
                 hasAvatar: Boolean(user.avatarUrl),
+                avatarUrl: user.avatarUrl ?? null,
             },
         });
 
@@ -147,6 +148,12 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
         newSocket.on("notification", (data: { message: string; type?: "info" | "success" }) => {
             notify(stripPolishDiacritics(data.message), data.type || "info");
+        });
+
+        newSocket.on("rating_updated", (data: { delta?: number; rating?: number; game?: string }) => {
+            const delta = Number(data.delta || 0);
+            const prefix = delta > 0 ? "+" : "";
+            notify(`ELO ${prefix}${delta} | ${data.rating ?? 500}`, delta >= 0 ? "success" : "info");
         });
 
         newSocket.on("game_invite", (data: { from: string }) => {

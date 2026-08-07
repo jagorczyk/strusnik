@@ -4,6 +4,7 @@ from typing import List, Dict, Any, Optional
 from .base import MultiplayerGame
 
 from models import db, User, GameStats
+from utils import record_match_history
 from flask import current_app
 
 
@@ -316,6 +317,17 @@ class SetGame(MultiplayerGame):
                     stats.draws = (stats.draws or 0) + 1
                 else:
                     stats.losses = (stats.losses or 0) + 1
+
+            winner_indices = [
+                index for index, seat in enumerate(self.seats)
+                if seat and seat.get('name') in winners
+            ]
+            record_match_history(
+                'Set',
+                self.seats,
+                winner_indices=winner_indices,
+                mode=getattr(self, 'matchmaking_mode', 'casual'),
+            )
             db.session.commit()
         except Exception as error:
             db.session.rollback()

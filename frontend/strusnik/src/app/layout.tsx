@@ -7,6 +7,7 @@ import InvitationModal from "./components/lobby/invitationModal";
 import { LangProvider } from "./lang";
 import { MotionProvider } from "./motion";
 import TopRightToggles from "./components/TopRightToggles";
+import MobileAppHeader from "./components/MobileAppHeader";
 import { NotificationProvider } from "./context/NotificationsContext";
 import PageTransition from "./components/PageTransition";
 
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <UserProvider>
                 <SocketProvider>
                   <TopRightToggles />
+                  <MobileAppHeader />
                   <InvitationModal />
                   <PageTransition>{children}</PageTransition>
                 </SocketProvider>

@@ -149,7 +149,12 @@ class Battleships(MultiplayerGame):
 
     def _record_win(self, winner_idx: int) -> None:
         try:
-            record_multiplayer_result("Battleships", self.seats, [winner_idx])
+            record_multiplayer_result(
+                "Battleships",
+                self.seats,
+                [winner_idx],
+                mode=getattr(self, "matchmaking_mode", "casual"),
+            )
         except Exception as error:
             from models import db
 
