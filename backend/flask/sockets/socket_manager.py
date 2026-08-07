@@ -1,6 +1,7 @@
 import eventlet
 import time
 import copy
+import random
 import unicodedata
 from datetime import datetime
 
@@ -14,6 +15,8 @@ from games.chess import chess
 from games.battleships import Battleships
 from games.setgame import SetGame
 from games.haxball import HAXBALL_MAPS, HaxballGame, VALID_DURATIONS, VALID_MODES, normalize_duration, normalize_map_id, normalize_mode
+from sockets.matchmaking import MatchmakingManager, QueueEntry, Match
+from utils import RANKED_INITIAL_RATING, get_game_rating, record_ranked_result
 
 try:
     from sockets.events_thousand import handle_thousand_move, get_thousand_state_for_player
@@ -35,6 +38,7 @@ manager.register_game("Haxball", GameType.Multiplayer, HaxballGame)
 active_sessions = {}
 disconnect_timers = {}
 room_deletion_timers = {}
+matchmaking_timers = {}
 guest_room_creations = {}
 guest_chat_by_ip = {}
 haxball_loops = {}
@@ -46,6 +50,9 @@ GUEST_CHAT_MAX_MESSAGES = 3
 BLOCKED_GUEST_NAME_PARTS = ("kurwa", "chuj", "jebac", "jeba", "pizda")
 TERMINAL_STAGES = {"game_over", "finished", "ended", "checkmate", "draw", "stalemate"}
 TERMINAL_ROOM_GRACE_SECONDS = 30
+MATCHMAKING_READY_SECONDS = 10
+
+matchmaking = MatchmakingManager()
 
 
 def socket_payload(data):
@@ -277,6 +284,277 @@ def broadcast_player_list():
     socket.emit('online_players_update', players)
 
 
+def matchmaking_entry_payload(entry):
+    session = active_sessions.get(entry.token, {})
+    return {
+        'userId': entry.token,
+        'username': entry.username,
+        'rating': entry.rating if entry.mode == 'ranked' else None,
+        'avatarUrl': session.get('avatar_url') or (
+            f"/api/profile/avatar/{entry.token}"
+            if not entry.is_guest and session.get('has_avatar')
+            else None
+        ),
+        'hasAvatar': bool(session.get('has_avatar', False)),
+        'isGuest': entry.is_guest,
+    }
+
+
+def emit_matchmaking_event(match, event_name, payload=None, exclude_tokens=None):
+    excluded = exclude_tokens or set()
+    for entry in match.entries:
+        if entry.token in excluded:
+            continue
+        session = active_sessions.get(entry.token, {})
+        if session.get('sid'):
+            emit(event_name, payload or {}, to=session['sid'])
+
+
+def matchmaking_status(entry, state='searching'):
+    session = active_sessions.get(entry.token, {})
+    if session.get('sid'):
+        emit('matchmaking_status', {
+            'state': state,
+            'game': entry.game_name,
+            'mode': entry.mode,
+            'rating': entry.rating if entry.mode == 'ranked' else None,
+        }, to=session['sid'])
+
+
+def schedule_matchmaking_expiry(match_id):
+    existing = matchmaking_timers.get(match_id)
+    if existing:
+        existing.cancel()
+    matchmaking_timers[match_id] = eventlet.spawn_after(
+        MATCHMAKING_READY_SECONDS,
+        expire_matchmaking_match,
+        match_id,
+    )
+
+
+def notify_matchmaking_found(match):
+    for entry in match.entries:
+        opponent = next(item for item in match.entries if item.token != entry.token)
+        session = active_sessions.get(entry.token, {})
+        if session.get('sid'):
+            emit('matchmaking_found', {
+                'matchId': match.match_id,
+                'game': match.game_name,
+                'mode': match.mode,
+                'readySeconds': MATCHMAKING_READY_SECONDS,
+                'opponent': matchmaking_entry_payload(opponent),
+            }, to=session['sid'])
+    schedule_matchmaking_expiry(match.match_id)
+
+
+def requeue_match_entries(match, exclude_tokens=None):
+    excluded = exclude_tokens or set()
+    for entry in match.entries:
+        if entry.token in excluded:
+            continue
+        session = active_sessions.get(entry.token, {})
+        if not session.get('connected') or not session.get('sid'):
+            continue
+        entry.sid = session['sid']
+        entry.joined_at = time.time()
+        new_match = matchmaking.enqueue(entry)
+        if new_match:
+            notify_matchmaking_found(new_match)
+        else:
+            matchmaking_status(entry, 'searching')
+
+
+def expire_matchmaking_match(match_id):
+    matchmaking_timers.pop(match_id, None)
+    match = matchmaking.remove_match(match_id)
+    if not match:
+        return
+    emit_matchmaking_event(match, 'matchmaking_cancelled', {
+        'reason': 'ready_timeout',
+        'requeued': True,
+    })
+    requeue_match_entries(match)
+
+
+def cancel_matchmaking_for_token(user_token, requeue_opponent=True):
+    matchmaking.remove_from_queue(user_token)
+    match = matchmaking.get_match_for_token(user_token)
+    if not match:
+        return
+    timer = matchmaking_timers.pop(match.match_id, None)
+    if timer:
+        timer.cancel()
+    matchmaking.remove_match(match.match_id)
+    emit_matchmaking_event(match, 'matchmaking_cancelled', {
+        'reason': 'cancelled',
+        'requeued': requeue_opponent,
+    }, exclude_tokens={user_token})
+    if requeue_opponent:
+        requeue_match_entries(match, exclude_tokens={user_token})
+
+
+def handle_matchmaking_disconnect(user_token):
+    if not user_token:
+        return
+    matchmaking.remove_from_queue(user_token)
+    match = matchmaking.get_match_for_token(user_token)
+    if not match:
+        return
+    timer = matchmaking_timers.pop(match.match_id, None)
+    if timer:
+        timer.cancel()
+    matchmaking.remove_match(match.match_id)
+    emit_matchmaking_event(match, 'matchmaking_cancelled', {
+        'reason': 'opponent_disconnected',
+        'requeued': True,
+    }, exclude_tokens={user_token})
+    requeue_match_entries(match, exclude_tokens={user_token})
+
+
+def get_queue_rating(user_token, game_name):
+    if is_guest_token(user_token):
+        return RANKED_INITIAL_RATING
+    try:
+        rating = get_game_rating(user_token, game_name)
+        return int(rating.rating if rating else RANKED_INITIAL_RATING)
+    except Exception as error:
+        db = None
+        try:
+            from models import db as models_db
+            db = models_db
+            db.session.rollback()
+        except Exception:
+            pass
+        current_app.logger.warning('Unable to load matchmaking rating: %s', error)
+        return RANKED_INITIAL_RATING
+
+
+def create_matchmaking_room(match):
+    entries = list(match.entries)
+    host = entries[0]
+    lobby = get_lobby_case_insensitive(match.game_name)
+    if not lobby:
+        return None
+
+    game_name = lobby.game.name
+    host_seat_index = random.choice([0, 1])
+    room = lobby.create_room(
+        host_id=host.sid,
+        room_name=f'Match {match.match_id[:8]}',
+        game_name=game_name,
+        max_players=2,
+        password=None,
+        time_control_min=10 if match.game_name == 'chess' else None,
+        host_user_token=host.token,
+        host_color_pref='random' if match.game_name == 'chess' else None,
+        host_seat_index=host_seat_index if match.game_name == 'chess' else None,
+        observers_allowed=False,
+        max_observers=0,
+    )
+    room.players = [entry.sid for entry in entries]
+    room.player_tokens = {entry.token for entry in entries}
+    room.is_matchmaking = True
+    room.matchmaking_mode = match.mode
+    room.matchmaking_id = match.match_id
+    room.host_id = host.sid
+    room.host_user_token = host.token
+
+    try:
+        room.game_instance = lobby.game_class(room.players)
+        room.game_instance.matchmaking_mode = match.mode
+        if isinstance(room.game_instance, chess):
+            room.game_instance.set_time_control(10)
+
+        for index, entry in enumerate(entries):
+            seat_index = host_seat_index if index == 0 and match.game_name == 'chess' else (1 - host_seat_index if match.game_name == 'chess' else index)
+            name = unique_room_player_name(room.game_instance, entry.username)
+            result = room.game_instance.sit_player(entry.sid, name, seat_index, entry.token)
+            if not result.get('success'):
+                raise RuntimeError(result.get('msg', 'Unable to seat matchmaking player'))
+
+        for entry in entries:
+            session = active_sessions.get(entry.token)
+            if not session:
+                raise RuntimeError('Matchmaking player session is missing')
+            session.update({'sid': entry.sid, 'room_id': room.uuid, 'role': 'player', 'connected': True})
+            join_room(room.uuid, sid=entry.sid)
+
+        started = room.game_instance.start_game()
+        if not started.get('success'):
+            raise RuntimeError(started.get('msg', 'Unable to start matchmaking game'))
+
+        match.room_id = room.uuid
+        emit_room_update(room)
+        for entry in entries:
+            session = active_sessions.get(entry.token, {})
+            if session.get('sid'):
+                emit('matchmaking_started', {
+                    'matchId': match.match_id,
+                    'roomId': room.uuid,
+                    'game': game_name,
+                    'mode': match.mode,
+                }, to=session['sid'])
+        broadcast_player_list()
+        return room
+    except Exception as error:
+        lobby.destroy_room(room.uuid)
+        current_app.logger.exception('Unable to create matchmaking room', exc_info=error)
+        return None
+
+
+def finish_matchmaking_match(match):
+    timer = matchmaking_timers.pop(match.match_id, None)
+    if timer:
+        timer.cancel()
+    matchmaking.remove_match(match.match_id)
+    room = create_matchmaking_room(match)
+    if not room:
+        emit_matchmaking_event(match, 'matchmaking_cancelled', {
+            'reason': 'room_creation_failed',
+            'requeued': True,
+        })
+        requeue_match_entries(match)
+
+
+def record_ranked_room_result(room):
+    if not room or not room.is_matchmaking or room.matchmaking_mode != 'ranked' or room.rating_recorded:
+        return
+    game = room.game_instance
+    seats = getattr(game, 'seats', []) or []
+    winner_index = None
+    draw = False
+
+    if isinstance(game, chess):
+        result = (getattr(game, 'game_state', {}) or {}).get('result') or {}
+        draw = result.get('status') == 'draw' or result.get('winner') is None
+        if not draw and result.get('winner') in ('w', 'b'):
+            winner_index = 0 if result.get('winner') == 'w' else 1
+    elif isinstance(game, Battleships):
+        winner_id = ((getattr(game, 'game_state', {}) or {}).get('winner') or {}).get('userId')
+        winner_index = next((index for index, seat in enumerate(seats) if seat and str(seat.get('userId')) == str(winner_id)), None)
+    elif isinstance(game, Stratego):
+        winner_id = ((getattr(game, 'game_state', {}) or {}).get('winner') or {}).get('userId')
+        winner_index = next((index for index, seat in enumerate(seats) if seat and str(seat.get('userId')) == str(winner_id)), None)
+
+    if not draw and winner_index is None:
+        return
+
+    try:
+        updates = record_ranked_result(room.game_name, seats, winner_index=winner_index, draw=draw)
+        room.rating_recorded = True
+        for update in updates:
+            session = active_sessions.get(str(update['user_id']), {})
+            if session.get('sid'):
+                emit('rating_updated', {
+                    'game': room.game_name.lower(),
+                    **update,
+                }, to=session['sid'])
+    except Exception as error:
+        from models import db
+        db.session.rollback()
+        current_app.logger.exception('Unable to record ranked result', exc_info=error)
+
+
 def get_game_state_safe(game, player_sid, user_token=None, is_observer=False):
     if isinstance(game, Thousand):
         return get_thousand_state_for_player(game, player_sid)
@@ -491,6 +769,7 @@ def forfeit_room_player(room, user_token, reason='disconnect_timeout'):
     result = game.forfeit_player(user_token, reason=reason)
     if not result.get('success'):
         return False
+    record_ranked_room_result(room)
     for seat in getattr(game, 'seats', []) or []:
         if seat and str(seat.get('userId')) == str(user_token):
             seat['connected'] = False
@@ -590,6 +869,8 @@ def process_player_loss(sid):
 
 @socket.on("disconnect")
 def handle_disconnect():
+    user_token = next((token for token, session in active_sessions.items() if session.get('sid') == request.sid), None)
+    handle_matchmaking_disconnect(user_token)
     process_player_loss(request.sid)
     eventlet.sleep(0.1)
     broadcast_player_list()
@@ -679,6 +960,7 @@ def handle_connect(auth):
     user_token = auth.get("token")
     username = auth.get("username")
     has_avatar = bool(auth.get("hasAvatar", False))
+    avatar_url = auth.get("avatarUrl")
     if not user_token:
         return False
 
@@ -715,6 +997,7 @@ def handle_connect(auth):
             "sid": new_sid,
             "username": username,
             "has_avatar": False if is_guest else has_avatar,
+            "avatar_url": None if is_guest else avatar_url,
             "connected": True,
             "is_guest": is_guest,
             "ip": request.remote_addr or "unknown",
@@ -746,6 +1029,7 @@ def handle_connect(auth):
             "room_id": None,
             "username": username,
             "has_avatar": False if is_guest else has_avatar,
+            "avatar_url": None if is_guest else avatar_url,
             "connected": True,
             "is_guest": is_guest,
             "role": None,
@@ -816,6 +1100,81 @@ def handle_get_rooms(data):
         return
     rooms_list = [r.to_dict() for r in lobby.rooms.values() if not is_terminal_game(r.game_instance)]
     emit('rooms_list', {"game": game_name, "rooms": rooms_list})
+
+
+@socket.on("matchmaking_join")
+def handle_matchmaking_join(data):
+    data = socket_payload(data)
+    game_name = matchmaking.normalize_game(data.get('game') or data.get('game_name'))
+    mode = matchmaking.normalize_mode(data.get('mode'))
+    user_token = next((token for token, session in active_sessions.items() if session.get('sid') == request.sid), None)
+    session = active_sessions.get(user_token, {}) if user_token else {}
+
+    if not user_token or not game_name or not mode:
+        emit('matchmaking_error', {'message': 'Nieprawidlowe ustawienia kolejki.'}, to=request.sid)
+        return
+    if mode == 'ranked' and is_guest_token(user_token):
+        emit('matchmaking_error', {'message': 'Zaloguj sie, aby grac rankingowo.'}, to=request.sid)
+        return
+    if session.get('room_id'):
+        emit('matchmaking_error', {'message': 'Najpierw opusc aktywna gre.'}, to=request.sid)
+        return
+
+    cancel_matchmaking_for_token(user_token, requeue_opponent=False)
+    entry = QueueEntry(
+        token=str(user_token),
+        sid=request.sid,
+        username=session.get('username') or 'GOSC',
+        game_name=game_name,
+        mode=mode,
+        is_guest=is_guest_token(user_token),
+        rating=get_queue_rating(user_token, game_name) if mode == 'ranked' else RANKED_INITIAL_RATING,
+    )
+    match = matchmaking.enqueue(entry)
+    if match:
+        notify_matchmaking_found(match)
+    else:
+        matchmaking_status(entry, 'searching')
+
+
+@socket.on("matchmaking_cancel")
+def handle_matchmaking_cancel(data):
+    user_token = next((token for token, session in active_sessions.items() if session.get('sid') == request.sid), None)
+    if not user_token:
+        return
+    had_queue = matchmaking.remove_from_queue(user_token)
+    match = matchmaking.get_match_for_token(user_token)
+    if match:
+        cancel_matchmaking_for_token(user_token, requeue_opponent=True)
+    emit('matchmaking_cancelled', {
+        'reason': 'cancelled',
+        'requeued': False,
+    }, to=request.sid)
+    if had_queue:
+        emit('matchmaking_status', {'state': 'idle'}, to=request.sid)
+
+
+@socket.on("matchmaking_ready")
+def handle_matchmaking_ready(data):
+    data = socket_payload(data)
+    match_id = str(data.get('matchId') or '').strip()
+    user_token = next((token for token, session in active_sessions.items() if session.get('sid') == request.sid), None)
+    if not user_token or not match_id:
+        return
+
+    match = matchmaking.mark_ready(match_id, str(user_token))
+    if not match:
+        emit('matchmaking_error', {'message': 'Ten mecz nie jest juz dostepny.'}, to=request.sid)
+        return
+
+    emit_matchmaking_event(match, 'matchmaking_ready_state', {
+        'matchId': match.match_id,
+        'readyUserIds': list(match.ready_tokens),
+        'readyCount': len(match.ready_tokens),
+        'totalPlayers': len(match.entries),
+    })
+    if matchmaking.is_ready(match.match_id):
+        finish_matchmaking_match(match)
 
 
 @socket.on("create_room")
@@ -1521,6 +1880,9 @@ def handle_player_move(data):
                 schedule_room_deletion(room_id)
         else:
             emit('error', {'msg': res['msg']}, to=player_id)
+
+    if is_terminal_game(game):
+        record_ranked_room_result(found_room)
 
 
 @socket.on("get_online_players")

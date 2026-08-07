@@ -1,0 +1,190 @@
+.page {
+  min-height: 100dvh;
+  padding: 88px 24px 48px;
+  color: var(--text);
+}
+
+.queueView {
+  display: grid;
+  min-height: calc(100dvh - 136px);
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.queueView h1 {
+  margin: 8px 0 0;
+  color: var(--text);
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.description,
+.foundHint {
+  margin: 10px 0 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.people {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 32px 0 24px;
+}
+
+.person {
+  display: flex;
+  width: 220px;
+  min-height: 80px;
+  flex: 0 1 220px;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  text-align: start;
+  background: rgba(20, 20, 20, 0.9);
+}
+
+.person > span {
+  min-width: 0;
+}
+
+.person strong,
+.person small {
+  display: block;
+}
+
+.person strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.versus {
+  flex: 0 0 auto;
+  color: var(--amber);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.message {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  max-width: 360px;
+  margin-top: 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.message p {
+  margin: 0;
+}
+
+.message a {
+  color: var(--amber);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cancelAction {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--surface-raised);
+  transition: transform 180ms cubic-bezier(0.32, 0.72, 0, 1), border-color 180ms ease, background-color 180ms ease;
+}
+
+.cancelAction:hover {
+  transform: translateY(-1px);
+  border-color: var(--amber);
+  color: var(--text);
+  background: var(--surface-soft);
+}
+
+.cancelAction:active {
+  transform: scale(0.96);
+}
+
+.page button:focus-visible,
+.page a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cancelAction {
+    transition: none;
+  }
+
+  .cancelAction:hover,
+  .cancelAction:active {
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding: 88px 14px 40px;
+  }
+
+  .queueView {
+    min-height: calc(100dvh - 128px);
+  }
+
+  .people {
+    width: 100%;
+    gap: 8px;
+  }
+
+  .person {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 12px 10px;
+  }
+}

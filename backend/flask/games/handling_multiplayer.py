@@ -31,6 +31,10 @@ class Room:
     map_id: Optional[str] = None
     match_mode: Optional[str] = None
     duration_min: Optional[int] = None
+    matchmaking_mode: Optional[str] = None
+    matchmaking_id: Optional[str] = None
+    rating_recorded: bool = False
+    is_matchmaking: bool = False
 
     def to_dict(self):
         seated = len(self.player_tokens)
@@ -61,6 +65,8 @@ class Room:
             "map_id": self.map_id,
             "match_mode": self.match_mode,
             "duration_min": self.duration_min,
+            "matchmaking_mode": self.matchmaking_mode,
+            "is_matchmaking": self.is_matchmaking,
         }
 
 

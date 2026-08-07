@@ -73,8 +73,8 @@ export default function InvitationModal() {
   if (!invitation) return null;
 
   return (
-    <div className="fixed inset-0 z-9999 grid place-items-center bg-black/80 p-4 backdrop-blur-sm" role="presentation">
-      <section className="game-panel w-full max-w-sm text-center" role="dialog" aria-modal="true" aria-labelledby="invitation-title">
+    <div className="mobile-modal-overlay fixed inset-0 z-9999 grid place-items-center bg-black/80 p-4 backdrop-blur-sm" role="presentation">
+      <section className="mobile-modal-dialog game-panel w-full max-w-sm text-center" role="dialog" aria-modal="true" aria-labelledby="invitation-title">
         <p className="page-kicker">{t(lang, "invitation.notification")}</p>
         <h2 id="invitation-title" className="mb-6 text-xl font-bold text-[var(--text)]">
           {t(lang, "invitation.contents")}

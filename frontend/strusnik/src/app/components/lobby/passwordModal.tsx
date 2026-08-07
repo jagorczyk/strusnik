@@ -45,9 +45,9 @@ export default function PasswordModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/80 p-4 backdrop-blur-sm" role="presentation">
+    <div className="mobile-modal-overlay fixed inset-0 z-50 grid place-items-center bg-black/80 p-4 backdrop-blur-sm" role="presentation">
       <form
-        className="game-panel w-full max-w-sm text-center"
+        className="mobile-modal-dialog game-panel w-full max-w-sm text-center"
         role="dialog"
         aria-modal="true"
         aria-labelledby="password-dialog-title"

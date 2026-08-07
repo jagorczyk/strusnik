@@ -214,7 +214,12 @@ class Thousand(MultiplayerGame):
 
             try:
                 winner_idx = self.seats.index(potential_winner)
-                record_multiplayer_result('Tysiac', self.seats, [winner_idx])
+                record_multiplayer_result(
+                    'Tysiac',
+                    self.seats,
+                    [winner_idx],
+                    mode=getattr(self, 'matchmaking_mode', 'casual'),
+                )
             except Exception as error:
                 db.session.rollback()
                 if current_app:
@@ -506,7 +511,12 @@ class Thousand(MultiplayerGame):
         }
         self.game_state['stage'] = 'game_over'
         try:
-            record_multiplayer_result('Tysiac', self.seats, [winner_idx])
+            record_multiplayer_result(
+                'Tysiac',
+                self.seats,
+                [winner_idx],
+                mode=getattr(self, 'matchmaking_mode', 'casual'),
+            )
         except Exception as error:
             db.session.rollback()
             if current_app:

@@ -7,6 +7,7 @@ import ActiveGameBanner from "@/app/components/lobby/ActiveGameBanner";
 import ListOfRooms from "@/app/components/lobby/listOfRooms";
 import OnlinePlayersList from "@/app/components/lobby/onlinePlayersList";
 import ReturnArrow from "@/app/components/lobby/returnArrow";
+import TournamentQueueButton from "@/app/components/lobby/TournamentQueueButton";
 import { t } from "@/app/i18n";
 import { useLang } from "@/app/lang";
 import { useSocket } from "@/app/hooks/useSocket";
@@ -45,11 +46,14 @@ export default function LobbyPage() {
             <p className="lobby-subtitle">{t(lang, "lobby.page_subtitle")}</p>
           </div>
 
-          <Link className="lobby-create-action" href={`/lobby/${slug}/createRoom`}>
-            <Plus size={19} strokeWidth={2} aria-hidden="true" />
-            <span>{t(lang, "rooms.create")}</span>
-            <ArrowUpRight size={18} strokeWidth={2} aria-hidden="true" />
-          </Link>
+          <div className="lobby-header-actions">
+            <TournamentQueueButton game={gameKey} />
+            <Link className="lobby-create-action" href={`/lobby/${slug}/createRoom`}>
+              <Plus size={19} strokeWidth={2} aria-hidden="true" />
+              <span>{t(lang, "rooms.create")}</span>
+              <ArrowUpRight size={18} strokeWidth={2} aria-hidden="true" />
+            </Link>
+          </div>
         </header>
 
         <div className="lobby-layout">
