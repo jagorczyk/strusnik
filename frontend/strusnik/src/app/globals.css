@@ -894,6 +894,12 @@ html {
   width: 100%;
 }
 
+@media (min-width: 800px) {
+  .game-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .game-card {
   display: flex;
   min-width: 0;
@@ -1384,7 +1390,7 @@ html {
   justify-items: center;
   align-self: center;
   gap: 24px;
-  width: 100%;
+  width: min(100%, 560px);
   padding: 32px;
   border: 1px solid color-mix(in srgb, var(--amber) 36%, var(--border));
   border-radius: 16px;
@@ -2868,8 +2874,7 @@ html {
 }
 
 .friends-panel__hint,
-.friends-panel__empty,
-.friends-panel__login p {
+.friends-panel__empty {
   margin: 0;
   color: var(--muted);
   font-size: 12px;
@@ -2994,7 +2999,6 @@ html {
 
 .friends-panel__icon-button:focus-visible,
 .friends-panel__confirm-remove:focus-visible,
-.friends-panel__primary-link:focus-visible,
 .friends-panel__error button:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
@@ -3080,35 +3084,6 @@ html {
 
 .friends-panel__loading span:nth-child(3) {
   animation-delay: 240ms;
-}
-
-.friends-panel__login {
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #1f1f1f;
-}
-
-.friends-panel__primary-link {
-  display: inline-flex;
-  min-height: 40px;
-  align-items: center;
-  justify-content: center;
-  padding: 6px 12px;
-  border: 1px solid rgba(255, 138, 61, 0.34);
-  border-radius: 9px;
-  background: rgba(255, 138, 61, 0.12);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.friends-panel__primary-link:hover {
-  border-color: var(--amber);
-  background: rgba(255, 138, 61, 0.22);
 }
 
 
@@ -17532,11 +17507,14 @@ button.haxball-seat:hover:not(:disabled) {
 }
 
 .site-legal-links {
+  position: absolute;
+  inset-inline-end: 0;
+  bottom: 0;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px 16px;
-  margin-top: 8px;
+  margin: 0;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
@@ -17544,9 +17522,7 @@ button.haxball-seat:hover:not(:disabled) {
 
 .site-legal-links a {
   color: inherit;
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
-  text-underline-offset: 3px;
+  text-decoration: none;
 }
 
 .site-legal-links a:hover {
@@ -17557,6 +17533,11 @@ button.haxball-seat:hover:not(:disabled) {
   border-radius: 4px;
   outline: 2px solid var(--focus);
   outline-offset: 3px;
+}
+
+.game-page-shell:has(.account-required-state) {
+  place-items: center;
+  padding-block: 48px;
 }
 
 @media (max-width: 640px) {

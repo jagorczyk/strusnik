@@ -6,6 +6,7 @@ import { useLang } from "../lang";
 import { t } from "../i18n";
 import { useSocket } from "../hooks/useSocket";
 import { useUser } from "../hooks/useUser";
+import AccountRequiredState from "./common/AccountRequiredState";
 import ProfileAvatar from "./profile/ProfileAvatar";
 
 interface Friend {
@@ -225,10 +226,7 @@ export default function FriendsPanel({ onPendingCountChange }: FriendsPanelProps
   return (
     <section id="friends-panel" className="friends-panel" aria-label={t(lang, "friends.title")}>
       {!isMember ? (
-        <div className="friends-panel__login">
-          <p>{t(lang, "friends.login_hint")}</p>
-          <a href="/auth" className="friends-panel__primary-link">{t(lang, "friends.login")}</a>
-        </div>
+        <AccountRequiredState />
       ) : (
         <>
           <div className="friends-panel__search">

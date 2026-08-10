@@ -252,7 +252,7 @@ export default function LoginModal() {
             </button>
 
             <p className="auth-legal-copy">
-              Korzystając z konta, akceptujesz <Link href="/terms">Regulamin</Link> i zapoznajesz się z <Link href="/privacy">Polityką prywatności</Link>.
+              Korzystajac z konta, akceptujesz <Link href="/terms">Regulamin</Link> i zapoznajesz sie z <Link href="/privacy">Polityka prywatnosci</Link>.
             </p>
           </div>
         </form>

@@ -1,9 +1,9 @@
 'use client';
 
 import { Clock3, X } from 'lucide-react';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import AccountRequiredState from '@/app/components/common/AccountRequiredState';
 import ProfileAvatar from '@/app/components/profile/ProfileAvatar';
 import ReturnArrow from '@/app/components/lobby/returnArrow';
 import { useSocket } from '@/app/hooks/useSocket';
@@ -63,8 +63,6 @@ export default function TournamentQueuePage() {
         waitingOpponent: 'Szukamy rywala',
         cancel: 'Anuluj wyszukiwanie',
         you: 'Ty',
-        login: 'Zaloguj sie, aby dolaczyc do kolejki turniejowej.',
-        loginAction: 'Zaloguj sie',
         connection: 'Brak polaczenia z serwerem.',
         unavailable: 'Kolejka turniejowa jest chwilowo niedostepna.',
         back: 'Wroc do lobby',
@@ -78,8 +76,6 @@ export default function TournamentQueuePage() {
         waitingOpponent: 'Finding an opponent',
         cancel: 'Cancel search',
         you: 'You',
-        login: 'Log in to join the tournament queue.',
-        loginAction: 'Log in',
         connection: 'No connection to the server.',
         unavailable: 'The tournament queue is temporarily unavailable.',
         back: 'Back to lobby',
@@ -177,57 +173,59 @@ export default function TournamentQueuePage() {
   const description = stage === 'searching' ? copy.searchingText : '';
 
   return (
-    <main id="main-content" className={styles.page}>
+    <main
+      id="main-content"
+      className={isLoginRequired ? `${styles.page} ${styles.pageAccountRequired}` : styles.page}
+    >
       <ReturnArrow href={`/lobby/${gameKey}`} text={t(lang, 'arrow')} />
 
-      <section className={styles.queueView} aria-labelledby="tournament-queue-title" aria-live="polite">
-        <p className={styles.kicker}>{copy.title}</p>
-        <h1 id="tournament-queue-title">{isLoginRequired ? copy.title : heading}</h1>
+      {isLoginRequired ? (
+        <AccountRequiredState backHref={`/lobby/${gameKey}`} backLabel={copy.back} />
+      ) : (
+        <section className={styles.queueView} aria-labelledby="tournament-queue-title" aria-live="polite">
+          <p className={styles.kicker}>{copy.title}</p>
+          <h1 id="tournament-queue-title">{heading}</h1>
 
-        {isLoginRequired ? (
-          <div className={styles.message}>
-            <p>{copy.login}</p>
-            <Link href="/auth">{copy.loginAction}</Link>
-          </div>
-        ) : stage === 'error' ? (
-          <div className={styles.message} role="alert">
-            <p>{isConnected ? copy.unavailable : copy.connection}</p>
-          </div>
-        ) : (
-          <>
-            {isSearching && <p className={styles.description}>{description}</p>}
+          {stage === 'error' ? (
+            <div className={styles.message} role="alert">
+              <p>{isConnected ? copy.unavailable : copy.connection}</p>
+            </div>
+          ) : (
+            <>
+              {isSearching && <p className={styles.description}>{description}</p>}
 
-            <section className={styles.people} aria-label="Uczestnicy kolejki">
-              <div className={styles.person}>
-                <ProfileAvatar avatarUrl={userInfo?.avatarUrl} displayName={myDisplayName} />
-                <span><strong>{myDisplayName}</strong><small>{myRating} ELO</small></span>
-              </div>
-              <span className={styles.versus} aria-hidden="true">VS</span>
-              <div className={styles.person}>
-                <ProfileAvatar avatarUrl={opponent?.avatarUrl} displayName={opponent?.username || '?'} />
-                <span>
-                  <strong>{opponent?.username || copy.waitingOpponent}</strong>
-                  {opponent?.rating ? <small>{opponent.rating} ELO</small> : null}
-                </span>
-              </div>
-            </section>
+              <section className={styles.people} aria-label="Uczestnicy kolejki">
+                <div className={styles.person}>
+                  <ProfileAvatar avatarUrl={userInfo?.avatarUrl} displayName={myDisplayName} />
+                  <span><strong>{myDisplayName}</strong><small>{myRating} ELO</small></span>
+                </div>
+                <span className={styles.versus} aria-hidden="true">VS</span>
+                <div className={styles.person}>
+                  <ProfileAvatar avatarUrl={opponent?.avatarUrl} displayName={opponent?.username || '?'} />
+                  <span>
+                    <strong>{opponent?.username || copy.waitingOpponent}</strong>
+                    {opponent?.rating ? <small>{opponent.rating} ELO</small> : null}
+                  </span>
+                </div>
+              </section>
 
-            {isSearching && (
-              <div className={styles.timer}>
-                <Clock3 size={17} aria-hidden="true" />
-                <strong>{queueSeconds} s</strong>
-              </div>
-            )}
+              {isSearching && (
+                <div className={styles.timer}>
+                  <Clock3 size={17} aria-hidden="true" />
+                  <strong>{queueSeconds} s</strong>
+                </div>
+              )}
 
-            {hasOpponent && <p className={styles.foundHint}>{copy.starting}</p>}
-          </>
-        )}
+              {hasOpponent && <p className={styles.foundHint}>{copy.starting}</p>}
+            </>
+          )}
 
-        <button type="button" className={styles.cancelAction} onClick={cancelQueue}>
-          <X size={18} aria-hidden="true" />
-          <span>{copy.cancel}</span>
-        </button>
-      </section>
+          <button type="button" className={styles.cancelAction} onClick={cancelQueue}>
+            <X size={18} aria-hidden="true" />
+            <span>{copy.cancel}</span>
+          </button>
+        </section>
+      )}
     </main>
   );
 }

@@ -188,3 +188,9 @@
     padding: 12px 10px;
   }
 }
+
+.pageAccountRequired {
+  display: grid;
+  place-items: center;
+  padding-block: 48px;
+}

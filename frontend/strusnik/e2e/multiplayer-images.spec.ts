@@ -19,7 +19,7 @@ test('multiplayer cards use right-sized image variants', async ({ page }) => {
     sizes: element.sizes,
   })));
 
-  expect(details.slice(0, 4).map((image) => image.loading)).toEqual(['eager', 'eager', 'eager', 'eager']);
-  expect(details.map((image) => image.sizes)).toEqual(Array(6).fill('(max-width: 720px) 50vw, 240px'));
+  expect(details.map((image) => image.loading)).toEqual(Array(6).fill('eager'));
+  expect(details.map((image) => image.sizes)).toEqual(Array(6).fill('(max-width: 720px) 50vw, 320px'));
   expect(details.map((image) => new URL(image.source).searchParams.get('w'))).toEqual(Array(6).fill('256'));
 });

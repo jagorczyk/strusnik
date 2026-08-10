@@ -52,8 +52,8 @@ export default function Card({ gameName, imgSrc, index = 0 }: CardProps) {
           alt=""
           src={imgSrc}
           fill
-          loading={index < 4 ? "eager" : "lazy"}
-          sizes="(max-width: 720px) 50vw, 240px"
+          loading="eager"
+          sizes="(max-width: 720px) 50vw, 320px"
         />
         <span className="game-card__glow" aria-hidden="true" />
       </span>
