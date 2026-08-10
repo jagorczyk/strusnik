@@ -1964,6 +1964,28 @@ html {
   width: 100%;
 }
 
+.auth-legal-copy {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.auth-legal-copy a {
+  color: var(--focus);
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 3px;
+}
+
+.auth-legal-copy a:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
 @media (max-width: 480px) {
   .auth-shell {
     place-items: start center;
@@ -17357,5 +17379,197 @@ button.haxball-seat:hover:not(:disabled) {
   .mobile-app-header__back:hover,
   .mobile-app-header__back:focus-visible {
     transform: none;
+  }
+}
+
+.legal-page-shell {
+  align-items: start;
+  padding-top: clamp(88px, 12vw, 128px);
+}
+
+.legal-page-card {
+  width: min(100%, 860px);
+  min-width: 0;
+  padding: clamp(24px, 5vw, 48px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(16px);
+  animation: motion-enter 700ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.legal-page-header {
+  max-width: 680px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.legal-page-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--amber);
+}
+
+.legal-page-meta .page-kicker {
+  margin-bottom: 0;
+}
+
+.legal-page-header h1 {
+  margin: 16px 0 0;
+  color: var(--text);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+.legal-page-header > p {
+  max-width: 60ch;
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.legal-page-content {
+  max-width: 68ch;
+  padding-top: 32px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.legal-page-content section + section {
+  margin-top: 32px;
+}
+
+.legal-page-content h2 {
+  margin: 0 0 12px;
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.legal-page-content p {
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+
+.legal-page-content p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-page-content ul {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding-inline-start: 24px;
+}
+
+.legal-page-content li {
+  padding-inline-start: 4px;
+  text-wrap: pretty;
+}
+
+.legal-page-callout {
+  margin: 0 0 32px;
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--amber) 36%, var(--border));
+  border-radius: 10px;
+  background: rgba(255, 138, 61, 0.08);
+  color: var(--text);
+}
+
+.legal-page-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 24px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.legal-page-nav__back,
+.legal-page-nav__links,
+.legal-page-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legal-page-nav a {
+  min-height: 40px;
+  color: var(--focus);
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 3px;
+}
+
+.legal-page-nav__back {
+  text-decoration: none !important;
+}
+
+.legal-page-nav__links {
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.legal-page-nav a:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.site-legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 16px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.site-legal-links a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+  text-underline-offset: 3px;
+}
+
+.site-legal-links a:hover {
+  color: var(--focus);
+}
+
+.site-legal-links a:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .legal-page-shell {
+    padding-top: 80px;
+  }
+
+  .legal-page-card {
+    padding: 24px 16px;
+  }
+
+  .legal-page-nav {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

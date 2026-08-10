@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { publicUrl } from "./app/api/auth/google/_utils";
 
 async function isTokenValid(token: string, request: NextRequest) {
     try {
@@ -30,7 +31,7 @@ export async function proxy(request: NextRequest) {
 
     const jwtToken = request.cookies.get("jwtToken")?.value;
     if (request.nextUrl.pathname === "/auth" && jwtToken && await isTokenValid(jwtToken, request)) {
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(publicUrl(request, "/"));
     }
 
     // Gameplay and shared UI are intentionally public. Account-only screens

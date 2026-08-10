@@ -62,6 +62,7 @@ services:
     restart: unless-stopped
     environment:
       API_URL: http://flask_api:5000
+      PUBLIC_ORIGIN: ${STRUSNIK_PUBLIC_ORIGIN}
       NODE_ENV: production
       PORT: 3000
     ports:

@@ -130,6 +130,11 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+
+        <nav className="site-legal-links" aria-label="Informacje prawne">
+          <Link href="/terms">Regulamin</Link>
+          <Link href="/privacy">Polityka prywatności</Link>
+        </nav>
       </div>
     </main>
   );
