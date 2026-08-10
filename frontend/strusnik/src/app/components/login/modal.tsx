@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { LogIn, UserPlus, UsersRound } from "lucide-react";
@@ -249,6 +250,10 @@ export default function LoginModal() {
               <UsersRound size={17} aria-hidden="true" />
               <span>{t(lang, "logging_in.guest")}</span>
             </button>
+
+            <p className="auth-legal-copy">
+              Korzystając z konta, akceptujesz <Link href="/terms">Regulamin</Link> i zapoznajesz się z <Link href="/privacy">Polityką prywatności</Link>.
+            </p>
           </div>
         </form>
       </section>

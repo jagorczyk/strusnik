@@ -3,6 +3,7 @@ import {
   BACKEND,
   copySetCookies,
   forwardCookies,
+  publicUrl,
   readApiPayload,
   safeReturnTo,
 } from "../_utils";
@@ -16,7 +17,7 @@ const COOKIE_NAMES = [
 ];
 
 function redirectWithError(request: NextRequest, code: string, returnTo = "/auth") {
-  const target = new URL(safeReturnTo(returnTo, "/auth"), request.url);
+  const target = publicUrl(request, safeReturnTo(returnTo, "/auth"));
   target.searchParams.set("google_error", code || "GOOGLE_AUTH_FAILED");
   const response = NextResponse.redirect(target);
   response.cookies.delete("google_oauth_state");
@@ -44,16 +45,16 @@ export async function GET(request: NextRequest) {
     let target: URL;
 
     if (data.status === "onboarding") {
-      target = new URL("/auth/google/complete", request.url);
+      target = publicUrl(request, "/auth/google/complete");
     } else if (data.status === "link_confirmation") {
-      target = new URL(returnTo, request.url);
+      target = publicUrl(request, returnTo);
       target.searchParams.set("google_link", "1");
     } else if (data.status === "reauthenticated") {
-      target = new URL(returnTo, request.url);
+      target = publicUrl(request, returnTo);
       target.searchParams.set("google_reauth", "1");
       target.searchParams.set("reauth_mode", data.mode || "");
     } else if (data.status === "authenticated" || data.status === "linked") {
-      target = new URL(returnTo, request.url);
+      target = publicUrl(request, returnTo);
       if (data.status === "linked") target.searchParams.set("google_linked", "1");
     } else {
       return redirectWithError(request, "GOOGLE_AUTH_FAILED");

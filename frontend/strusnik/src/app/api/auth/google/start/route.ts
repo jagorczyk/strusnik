@@ -3,6 +3,7 @@ import {
   BACKEND,
   copySetCookies,
   forwardCookies,
+  publicUrl,
   readApiPayload,
   safeReturnTo,
 } from "../_utils";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 const COOKIE_NAMES = ["jwtToken"];
 
 function errorRedirect(request: NextRequest, returnTo: string, code: string) {
-  const target = new URL(safeReturnTo(returnTo, "/auth"), request.url);
+  const target = publicUrl(request, safeReturnTo(returnTo, "/auth"));
   target.searchParams.set("google_error", code || "GOOGLE_AUTH_FAILED");
   return NextResponse.redirect(target);
 }

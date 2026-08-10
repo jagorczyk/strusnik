@@ -55,6 +55,21 @@ export function safeReturnTo(value: string | null | undefined, fallback = "/") {
   }
 }
 
+export function publicUrl(request: NextRequest, path: string) {
+  const configuredOrigin = process.env.PUBLIC_ORIGIN?.trim();
+  let origin = request.nextUrl.origin;
+
+  if (configuredOrigin) {
+    try {
+      origin = new URL(configuredOrigin).origin;
+    } catch {
+      // Fall back to the request origin when the deployment value is invalid.
+    }
+  }
+
+  return new URL(safeReturnTo(path), origin);
+}
+
 export function redirectToPath(request: NextRequest, path: string) {
-  return NextResponse.redirect(new URL(safeReturnTo(path), request.url));
+  return NextResponse.redirect(publicUrl(request, path));
 }
