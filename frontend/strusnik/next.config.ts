@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    cpus: 2,
+  },
   images: {
     // The game grid cards render below the default 640px image breakpoint.
     // Keep a 384px device size so Next can select the existing 256px variant
