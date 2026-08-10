@@ -6,6 +6,7 @@ cryptography~=46.0.3
 python-dotenv
 PyJWT
 google-auth~=2.40.0
+requests~=2.32.3
 pip~=23.2.1
 wheel~=0.41.2
 cffi~=2.0.0
