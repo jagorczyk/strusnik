@@ -25,11 +25,11 @@ export default function LegalPage({ title, intro, children }: LegalPageProps) {
         <nav className="legal-page-nav" aria-label="Dokumenty serwisu">
           <Link className="legal-page-nav__back" href="/">
             <ArrowLeft size={16} aria-hidden="true" />
-            <span>Wróć do Strusnika</span>
+            <span>Wroc do Strusnika</span>
           </Link>
           <div className="legal-page-nav__links">
             <Link href="/terms">Regulamin</Link>
-            <Link href="/privacy">Polityka prywatności</Link>
+            <Link href="/privacy">Polityka prywatnosci</Link>
           </div>
         </nav>
       </article>
