@@ -11,7 +11,7 @@ Strusnik is a browser-based game platform for playing classic games alone or wit
 - Multiplayer rooms for Chess, Haxball, Stratego, Thousand, Battleships, and Set.
 - Single-player Blackjack, Snake, and Tic-Tac-Toe.
 - Registered accounts and guest identities.
-- JWT-based authentication with an HTTP-only cookie.
+- JWT-based authentication with an HTTP-only cookie, plus optional Google sign in.
 - Profiles, avatars, multiplayer statistics, single-player scores, and rankings.
 - Friends and friend-request management.
 - Room passwords, spectators, invitations, in-game chat, and online-player presence.
@@ -117,7 +117,18 @@ DB_PASSWORD=change-this-password
 DB_HOST=mysql_db
 MYSQL_ROOT_PASSWORD=change-this-root-password
 SECRET_KEY=replace-with-a-long-random-secret
+SESSION_COOKIE_SECURE=false
+GOOGLE_CLIENT_ID=your-google-web-client-id
+GOOGLE_CLIENT_SECRET=your-google-web-client-secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/google/callback
 ```
+
+Google OAuth is optional in local development. When enabled, create a **Web application** OAuth client in Google Cloud and add these redirect URIs:
+
+- `http://localhost:3000/api/auth/google/callback`
+- `https://strusnik.pl/api/auth/google/callback`
+
+Keep the client secret only in `backend/.env` or the production backend environment. Never commit it.
 
 For a direct Flask process outside Docker, also set a database URL such as:
 
@@ -225,10 +236,15 @@ The Flask API is mounted under `/api`. In production, browser requests should no
 | --- | --- | --- | --- |
 | `POST` | `/api/auth/register` | No | Create an account. Body: `{ "username", "password" }`. |
 | `POST` | `/api/auth/login` | No | Log in and set the authentication cookie. Body: `{ "username", "password" }`. |
+| `GET` | `/api/auth/google/start` | No or Yes | Start Google OAuth. Supports `mode=login`, `link`, `reauth_password`, and `reauth_account`. |
+| `GET` | `/api/auth/google/callback` | No or Yes | Complete the Google OAuth callback. The public Next.js route relays it to Flask. |
+| `GET` | `/api/auth/google/pending` | No | Read the pending Google registration suggestion. |
+| `POST` | `/api/auth/google/complete` | No | Finish Google registration. Body: `{ "username" }`. |
+| `POST` | `/api/auth/google/link` | Yes | Link a Google identity after OAuth. Body: `{ "password" }`. |
 | `GET` | `/api/auth/token` | Cookie or token | Read the current JWT claims and the user's avatar URL. |
 | `POST` | `/api/auth/validate` | Token in body or cookie | Validate a token. Body: `{ "token" }`. |
-| `PUT` | `/api/auth/password` | Yes | Change the password. Requires `current_password`, `new_password`, and `confirm_password`. |
-| `DELETE` | `/api/auth/account` | Yes | Delete the current account after password and confirmation checks. |
+| `PUT` | `/api/auth/password` | Yes | Change or set a password. Password accounts require `current_password`; Google-only accounts require fresh Google reauthentication plus `new_password` and `confirm_password`. |
+| `DELETE` | `/api/auth/account` | Yes | Delete the current account after confirmation. Password accounts use the password; Google-only accounts use fresh Google reauthentication. |
 | `POST` | `/api/auth/logout` | No | Clear the authentication cookie. |
 
 The Next.js application exposes small same-origin handlers for these operations, including `/api/auth/parse` as the browser-facing token parsing route.
@@ -381,6 +397,7 @@ The complete event handlers live in `backend/flask/sockets/socket_manager.py` an
 | `/profile` | Current profile. |
 | `/settings` | Account settings. |
 | `/auth` | Sign in and registration. |
+| `/auth/google/complete` | Choose a username after the first Google sign in. |
 | `/lobby/<game>` | Lobby for Chess, Haxball, Stratego, Thousand, Battleships, or Set. |
 | `/lobby/<game>/createRoom` | Room creation flow. |
 | `/games/<Game>/<roomId>` | Active multiplayer game route. |
@@ -406,7 +423,7 @@ The workflow:
 Production configuration is intentionally kept outside Git:
 
 - `/home/deploy/strusnik/.env` contains deployment variables such as `STRUSNIK_PUBLIC_ORIGIN`.
-- `/home/deploy/strusnik/backend/.env` contains database credentials and `SECRET_KEY`.
+- `/home/deploy/strusnik/backend/.env` contains database credentials, `SECRET_KEY`, and Google OAuth credentials.
 - The existing infrastructure-owned Nginx container loads `deploy/nginx-strusnik.conf`.
 
 Do not commit private keys, production `.env` files, database credentials, or deployment state.

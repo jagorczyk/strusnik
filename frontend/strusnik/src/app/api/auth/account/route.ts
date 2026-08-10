@@ -16,6 +16,7 @@ async function readResponse(response: Response) {
 
 export async function DELETE(request: NextRequest) {
   const token = request.cookies.get("jwtToken")?.value;
+  const reauth = request.cookies.get("google_reauth")?.value;
   if (!token) {
     return NextResponse.json({ error: "Unauthorized", code: "UNAUTHORIZED" }, { status: 401 });
   }
@@ -26,6 +27,7 @@ export async function DELETE(request: NextRequest) {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
+        ...(reauth ? { Cookie: `google_reauth=${reauth}` } : {}),
       },
       body: await request.text(),
       cache: "no-store",
@@ -33,7 +35,10 @@ export async function DELETE(request: NextRequest) {
     const data = await readResponse(response);
     const nextResponse = NextResponse.json(data, { status: response.status });
 
-    if (response.ok) nextResponse.cookies.delete("jwtToken");
+    if (response.ok) {
+      nextResponse.cookies.delete("jwtToken");
+      nextResponse.cookies.delete("google_reauth");
+    }
     return nextResponse;
   } catch {
     return NextResponse.json(

@@ -37,6 +37,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                         nickname: data.login,
                         avatarUrl: data.avatar_url ?? null,
                         isGuest: false,
+                        hasPassword: data.has_password !== false,
+                        hasGoogle: data.has_google === true,
                     });
                     setIsLoading(false);
                     return;

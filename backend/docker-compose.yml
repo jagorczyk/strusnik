@@ -31,6 +31,8 @@ services:
       dockerfile: Dockerfile
     container_name: flask_api_container
     restart: always
+    env_file:
+      - .env
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=development

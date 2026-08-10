@@ -61,7 +61,10 @@ with app.app_context():
         try:
             db.create_all()
             game_stats_columns = {column["name"] for column in inspect(db.engine).get_columns("game_stats")}
-            user_columns = {column["name"] for column in inspect(db.engine).get_columns("users")}
+            user_column_info = inspect(db.engine).get_columns("users")
+            user_columns = {column["name"] for column in user_column_info}
+            user_indexes = inspect(db.engine).get_indexes("users")
+            user_unique_constraints = inspect(db.engine).get_unique_constraints("users")
             missing_columns = {
                 "losses": (game_stats_columns, "ALTER TABLE game_stats ADD COLUMN losses INTEGER NOT NULL DEFAULT 0"),
                 "draws": (game_stats_columns, "ALTER TABLE game_stats ADD COLUMN draws INTEGER NOT NULL DEFAULT 0"),
@@ -78,6 +81,23 @@ with app.app_context():
                     connection.execute(text("ALTER TABLE users ADD COLUMN avatar_url LONGTEXT NULL"))
                 elif db.engine.dialect.name == "mysql":
                     connection.execute(text("ALTER TABLE users MODIFY COLUMN avatar_url LONGTEXT NULL"))
+
+                if "google_sub" not in user_columns:
+                    connection.execute(text("ALTER TABLE users ADD COLUMN google_sub VARCHAR(255) NULL"))
+
+                password_column = next((column for column in user_column_info if column["name"] == "password"), None)
+                if password_column and not password_column.get("nullable") and db.engine.dialect.name == "mysql":
+                    connection.execute(text("ALTER TABLE users MODIFY COLUMN password VARCHAR(255) NULL"))
+
+                has_google_index = any(
+                    index.get("unique") and index.get("column_names") == ["google_sub"]
+                    for index in user_indexes
+                ) or any(
+                    constraint.get("column_names") == ["google_sub"]
+                    for constraint in user_unique_constraints
+                )
+                if not has_google_index:
+                    connection.execute(text("CREATE UNIQUE INDEX uq_users_google_sub ON users (google_sub)"))
             break
         except Exception as error:
             app.logger.warning("Database initialization attempt failed: %s", error)

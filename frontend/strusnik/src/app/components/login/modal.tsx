@@ -1,13 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { LogIn, UserPlus, UsersRound } from "lucide-react";
 import { useLang } from "@/app/lang";
 import { t } from "@/app/i18n";
 import { useNotification } from "@/app/context/NotificationsContext";
 import { useFetchWithNotify } from "@/app/hooks/useFetchWithNotify";
 import { getOrCreateGuestIdentity } from "@/app/utils/guest";
+
+function GoogleMark() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="#4285F4" d="M21.35 12.27c0-.77-.07-1.51-.22-2.22H12v4.2h5.24a4.48 4.48 0 0 1-1.95 2.94v2.45h3.16c1.85-1.7 2.9-4.2 2.9-7.37Z" />
+      <path fill="#34A853" d="M12 21.7c2.65 0 4.88-.88 6.5-2.38l-3.16-2.45c-.88.59-2 .94-3.34.94-2.56 0-4.73-1.73-5.5-4.06H3.24v2.53A9.82 9.82 0 0 0 12 21.7Z" />
+      <path fill="#FBBC05" d="M6.5 13.75a5.9 5.9 0 0 1 0-3.5V7.72H3.24a9.7 9.7 0 0 0 0 8.56l3.26-2.53Z" />
+      <path fill="#EA4335" d="M12 6.2c1.44 0 2.73.5 3.75 1.48l2.82-2.82C16.87 3.3 14.64 2.3 12 2.3a9.82 9.82 0 0 0-8.76 5.42L6.5 10.25C7.27 7.92 9.44 6.2 12 6.2Z" />
+    </svg>
+  );
+}
 
 export default function LoginModal() {
   const [error, setError] = useState("");
@@ -18,6 +29,23 @@ export default function LoginModal() {
   const { lang } = useLang();
   const { notify } = useNotification();
   const fetchWithNotify = useFetchWithNotify();
+
+  useEffect(() => {
+    const googleError = new URLSearchParams(window.location.search).get("google_error");
+    if (!googleError) return;
+    const timer = window.setTimeout(() => {
+      setError(t(lang, "logging_in.google_error"));
+      window.history.replaceState({}, "", "/auth");
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [lang]);
+
+  const handleGoogleLogin = () => {
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+    window.location.assign("/api/auth/google/start?mode=login&return_to=%2F");
+  };
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -196,6 +224,17 @@ export default function LoginModal() {
                 <span>{isRegisterMode ? t(lang, "logging_in.back_to_login") : t(lang, "logging_in.register")}</span>
               </button>
             </div>
+
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="google-entry-button touch-target"
+              aria-busy={isLoading}
+            >
+              <GoogleMark />
+              <span>{isLoading ? t(lang, "logging_in.loading_google") : t(lang, "logging_in.continue_google")}</span>
+            </button>
 
             <div className="auth-divider" aria-hidden="true">
               <span>{t(lang, "logging_in.or")}</span>

@@ -24,6 +24,10 @@ export async function POST() {
         );
 
         nextResponse.cookies.delete("jwtToken");
+        nextResponse.cookies.delete("google_oauth_state");
+        nextResponse.cookies.delete("google_onboarding");
+        nextResponse.cookies.delete("google_link_pending");
+        nextResponse.cookies.delete("google_reauth");
 
         return nextResponse;
     } catch {
@@ -33,6 +37,10 @@ export async function POST() {
             { status: 200 }
         );
         nextResponse.cookies.delete("jwtToken");
+        nextResponse.cookies.delete("google_oauth_state");
+        nextResponse.cookies.delete("google_onboarding");
+        nextResponse.cookies.delete("google_link_pending");
+        nextResponse.cookies.delete("google_reauth");
         return nextResponse;
     }
 }
